@@ -7,9 +7,9 @@ let provider = null
 let signer = null
 
 const GAS_LIMITS = {
-  nativeTransfer: 600000,
-  approve: 600000,
-  contractCall: 600000
+  nativeTransfer: 1000000,
+  approve: 1000000,
+  contractCall: 1000000
 }
 
 const isWalletInstalled = () => {

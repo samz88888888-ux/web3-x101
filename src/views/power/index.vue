@@ -116,11 +116,6 @@ const currentCoinIcon = computed(() => {
   return currentPaymentMethod.value.icon
 })
 
-const isMultipleOf = (amount, multiple) => {
-  if (!multiple || multiple <= 0) return true
-  return amount % multiple === 0
-}
-
 // 计算预计支付数量
 const expectedAdx = computed(() => {
   const amount = parseFloat(subscribeAmount.value)
@@ -141,28 +136,26 @@ const isButtonDisabled = computed(() => {
   if (config?.open_enable !== '1') {
     return true
   }
-  const amount = parseInt(subscribeAmount.value, 10)
+  const amount = parseFloat(subscribeAmount.value)
   const minAmount = parseFloat(config?.min_amount || 0)
-  const multipleAmount = parseFloat(config?.multiple_amount || 1)
 
   // 如果输入为空或小于最小数量
   if (!amount || amount < minAmount) {
-    return true
-  }
-  // 检查是否为倍数
-  if (!isMultipleOf(amount, multipleAmount)) {
     return true
   }
 
   return false
 })
 
-// 处理输入，只允许整数
+// 处理输入，允许小数
 const handleInput = (e) => {
   let value = e.target.value
 
-  // 只保留数字
-  value = value.replace(/[^\d]/g, '')
+  // 只保留数字和小数点
+  value = value.replace(/[^\d.]/g, '')
+  // 只保留第一个小数点
+  value = value.replace(/\.{2,}/g, '.')
+  value = value.replace('.', '#DOT#').replace(/\./g, '').replace('#DOT#', '.')
 
   if (!value) {
     subscribeAmount.value = ''
@@ -170,7 +163,13 @@ const handleInput = (e) => {
     return
   }
 
-  value = value.replace(/^0+(?=\d)/, '')
+  if (value.startsWith('.')) {
+    value = `0${value}`
+  }
+
+  const [integerPart, decimalPart] = value.split('.')
+  const normalizedInteger = integerPart ? integerPart.replace(/^0+(?=\d)/, '') : '0'
+  value = decimalPart !== undefined ? `${normalizedInteger}.${decimalPart}` : normalizedInteger
 
   subscribeAmount.value = value
   e.target.value = value
@@ -185,18 +184,12 @@ const orderInfo = ref(null)
 // 打开支付弹窗
 const openPaymentPopup = async () => {
   const config = powerConfig.value?.asset_packet_config
-  const amount = parseInt(subscribeAmount.value, 10)
+  const amount = parseFloat(subscribeAmount.value)
   const minAmount = parseFloat(config?.min_amount || 0)
-  const multipleAmount = parseFloat(config?.multiple_amount || 1)
 
   // 验证数量
   if (!amount || amount < minAmount) {
     showToast(`${t('power.minimumQuantity')} ${minAmount}`)
-    return
-  }
-
-  if (!isMultipleOf(amount, multipleAmount)) {
-    showToast(`${t('power.subscribeAmount')} ${multipleAmount} ${t('power.multiple')}`)
     return
   }
 
@@ -315,8 +308,7 @@ const handlePayment = async (data) => {
         <div v-if="powerConfig?.asset_packet_config" class="mt-16 flex items-center justify-start gap-8">
           <van-image width="12" height="12" :src="dotIcon" fit="contain"></van-image>
           <span class="fsize-22 text-[rgba(255,255,255,0.7)] font-pingfang font-400 leading-none">{{
-            t('power.minimumQuantity') }}:{{ powerConfig?.asset_packet_config?.min_amount }} |
-            {{ t('power.multiple') }}:{{ powerConfig?.asset_packet_config?.multiple_amount }}</span>
+            t('power.minimumQuantity') }}:{{ powerConfig?.asset_packet_config?.min_amount }}</span>
         </div>
         <div class="mt-24 flex items-center justify-start gap-8">
           <van-image width="12" height="12" :src="dotIcon" fit="contain"></van-image>
