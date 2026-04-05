@@ -1,0 +1,167 @@
+{
+  // ===== i18n 国际化配置 =====
+  "i18n-ally.localesPaths": ["src/lang/modules"],
+  "i18n-ally.keystyle": "nested", // 使用嵌套风格的键 (例如: power.teamPower)
+  "i18n-ally.enabledFrameworks": ["vue"], // 启用 Vue 框架支持
+  "i18n-ally.sourceLanguage": "zh", // 源语言为中文
+  "i18n-ally.displayLanguage": "zh", // 显示语言为中文
+  "i18n-ally.enabledParsers": ["json"], // 改为 JSON 解析器（更稳定、支持编辑）
+  "i18n-ally.namespace": false, // 不使用命名空间（单文件模式）
+  "i18n-ally.pathMatcher": "{locale}.json", // 改为 .json 文件匹配
+  "i18n-ally.sortKeys": false, // 不自动排序键
+  "i18n-ally.dirStructure": "file", // 目录结构类型：file (不是 auto)
+  "i18n-ally.editor.preferEditor": true, // 优先使用编辑器
+  "i18n-ally.extract.keygenStyle": "nested", // key 生成风格
+  "i18n-ally.extract.autoDetect": true, // 自动检测
+  "i18n-ally.refactor.templates": [], // 清空重构模板
+  // 显示所有语言（包括未翻译的）
+  "i18n-ally.enabledLocales": ["zh", "tw", "en", "ja", "kr", "id", "vi", "th"],
+  // 语言代码映射 - 告诉 i18n-ally 每个语言代码对应的实际语言
+  "i18n-ally.localeCountryMap": {
+    "zh": "zh-CN", // 简体中文
+    "tw": "zh-TW", // 繁体中文（台湾）
+    "en": "en-US", // 英文（美国）
+    "ja": "ja-JP", // 日文
+    "kr": "ko-KR", // 韩文
+    "id": "id-ID", // 印尼文
+    "vi": "vi-VN", // 越南文
+    "th": "th-TH" // 泰文
+  },
+  // 禁用机器翻译（避免自动翻译成错误的语言）
+  "i18n-ally.translate.engines": [],
+
+  // ===== 编辑器基础配置 =====
+  "editor.formatOnSave": true, // 保存时自动格式化
+  "editor.formatOnPaste": true, // 粘贴时自动格式化
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit", // 保存时自动修复 ESLint 错误
+    "source.organizeImports": "never" // 禁用自动整理导入（避免与 ESLint 冲突）
+  },
+  "editor.tabSize": 2, // Tab 缩进为 2 个空格
+  "editor.detectIndentation": false, // 不自动检测缩进
+  "editor.defaultFormatter": "esbenp.prettier-vscode", // 默认使用 Prettier 格式化
+
+  // ===== 文件类型格式化器配置 =====
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // ===== Vue 相关配置 =====
+  "volar.autoCompleteRefs": true, // Vue3 ref 自动补全
+  "volar.codeLens.pugTools": false,
+  "volar.completion.autoImportComponent": true, // 自动导入组件
+
+  // ===== ESLint 配置 =====
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact", "vue"],
+  "eslint.probe": ["javascript", "javascriptreact", "typescript", "typescriptreact", "vue"],
+
+  // ===== Prettier 配置 =====
+  // 注意：大部分配置已移到 .prettierrc.json 文件中
+  // 这里只保留 VSCode 特定的设置
+  "prettier.requireConfig": false, // 即使没有配置文件也使用 Prettier
+  "prettier.useEditorConfig": false, // 不使用 EditorConfig
+
+  // ===== 文件相关配置 =====
+  "files.eol": "\n", // 统一换行符为 LF
+  "files.autoSave": "onFocusChange", // 失去焦点时自动保存
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/node_modules": true,
+    "**/dist": true
+  },
+
+  // ===== 编辑器外观配置 =====
+  "editor.fontSize": 14, // 字体大小
+  "editor.lineHeight": 1.7, // 行高
+  "editor.fontFamily": "'Fira Code', 'JetBrains Mono', Menlo, Monaco, 'Courier New', monospace",
+  "editor.fontLigatures": true, // 启用连字
+  "editor.cursorBlinking": "smooth", // 光标平滑闪烁
+  "editor.cursorSmoothCaretAnimation": "on", // 平滑光标动画
+  "editor.smoothScrolling": true, // 平滑滚动
+  "editor.minimap.enabled": true, // 显示代码缩略图
+  "editor.renderWhitespace": "boundary", // 显示空白字符
+  "editor.bracketPairColorization.enabled": true, // 括号对着色
+  "editor.guides.bracketPairs": true, // 显示括号对指引线
+
+  // ===== 代码提示和智能感知配置 =====
+  "editor.quickSuggestions": {
+    "strings": true // 在字符串中启用快速建议
+  },
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "editor.inlineSuggest.enabled": true, // 启用内联建议
+  "editor.suggestSelection": "first", // 默认选择第一个建议
+  "editor.acceptSuggestionOnEnter": "on", // 按 Enter 接受建议
+
+  // ===== 工作区配置 =====
+  "explorer.confirmDelete": false, // 删除文件时不确认
+  "explorer.confirmDragAndDrop": false, // 拖放文件时不确认
+  "workbench.startupEditor": "none", // 启动时不打开欢迎页
+  "workbench.editor.enablePreview": false, // 禁用预览模式（双击才打开文件）
+  "workbench.editor.tabSizing": "fit", // Tab 大小自适应
+
+  // ===== 搜索配置 =====
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.git": true,
+    "**/package-lock.json": true
+  },
+
+  // ===== TypeScript/JavaScript 配置 =====
+  "javascript.updateImportsOnFileMove.enabled": "always", // 文件移动时自动更新导入
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "javascript.suggest.autoImports": true, // 自动导入建议
+  "typescript.suggest.autoImports": true,
+
+  // ===== Emmet 配置 =====
+  "emmet.syntaxProfiles": {
+    "vue-html": "html",
+    "vue": "html"
+  },
+  "emmet.includeLanguages": {
+    "vue-html": "html",
+    "vue": "html"
+  },
+  "emmet.triggerExpansionOnTab": true, // Tab 键触发 Emmet
+
+  // ===== Git 配置 =====
+  "git.autofetch": true, // 自动拉取
+  "git.confirmSync": false, // 同步时不确认
+  "git.enableSmartCommit": true, // 智能提交
+
+  // ===== 终端配置 =====
+  "terminal.integrated.fontSize": 13,
+  "terminal.integrated.lineHeight": 1.2,
+
+  // ===== 其他优化配置 =====
+  "breadcrumbs.enabled": true, // 显示面包屑导航
+  "problems.decorations.enabled": true, // 在文件树中显示问题装饰
+  "editor.wordWrap": "on", // 自动换行
+  "editor.mouseWheelZoom": true, // 按住 Ctrl 滚动鼠标缩放
+  "window.zoomLevel": 0 // 窗口缩放级别
+}
