@@ -27,20 +27,19 @@ const boxPrice = computed(() => {
   return boxConfig.value?.price || '0'
 })
 
-// 需要支付的 X101 数量
-const needX101 = computed(() => {
-  return boxConfig.value?.needSOTA || '0'
-})
+// SOTA 相关
+const needSOTA = computed(() => boxConfig.value?.needSOTA || '0')
+const sotaBalance = computed(() => boxConfig.value?.sota_balance || '0')
+const sotaPrice = computed(() => boxConfig.value?.sota_price || 0)
 
-// X101 余额
-const x101Balance = computed(() => {
-  return boxConfig.value?.sota_balance || '0'
-})
+// X101 相关
+const needX101 = computed(() => boxConfig.value?.needX101 || '0')
+const x101Balance = computed(() => boxConfig.value?.x101_balance || '0')
+const x101Price = computed(() => boxConfig.value?.x101_price || 0)
 
-// X101 当前价格
-const x101Price = computed(() => {
-  return boxConfig.value?.sota_price || 0
-})
+// ===== 支付选择弹窗 =====
+const showPaymentPopup = ref(false)
+const selectedPaymentType = ref(1) // 1-SOTA 2-X101，默认SOTA
 
 // ===== 抽奖状态 =====
 const isDrawing = ref(false)
@@ -171,22 +170,29 @@ const getBoxConfig = async () => {
   }
 }
 
-// ===== 立即抽奖 =====
-const handleDraw = async () => {
-  // 检查是否开启
+// ===== 点击抽奖按钮：弹出支付选择弹窗 =====
+const handleDraw = () => {
   if (!isBoxEnabled.value) {
     showToast(t('box.boxNotEnabled'))
     return
   }
+  if (isDrawing.value) return
+  // 每次弹窗都重置为默认 SOTA
+  selectedPaymentType.value = 1
+  showPaymentPopup.value = true
+}
 
-  // 检查余额
-  if (parseFloat(x101Balance.value) < parseFloat(needX101.value)) {
-    showToast(t('box.balanceNotEnough'))
+// ===== 确认支付并抽奖 =====
+const confirmDraw = async () => {
+  const needAmount = selectedPaymentType.value === 1 ? needSOTA.value : needX101.value
+  const balance = selectedPaymentType.value === 1 ? sotaBalance.value : x101Balance.value
+
+  if (parseFloat(balance) < parseFloat(needAmount)) {
+    showToast(selectedPaymentType.value === 1 ? t('box.sotaBalanceNotEnough') : t('box.x101BalanceNotEnough'))
     return
   }
 
-  // 防止重复点击
-  if (isDrawing.value) return
+  showPaymentPopup.value = false
 
   try {
     isDrawing.value = true
@@ -194,27 +200,32 @@ const handleDraw = async () => {
     // 显示开奖动画
     await new Promise(resolve => setTimeout(resolve, 2000))
 
-    // 调用抽奖接口
-    const res = await api.box.boxOperate()
+    // 调用抽奖接口，传递支付方式
+    const res = await api.box.boxOperate({ amount_type: selectedPaymentType.value })
 
     // 保存结果
     drawResult.value = res
 
     // 更新余额
-    if (res?.sota_balance !== undefined) {
-      boxConfig.value.sota_balance = res.sota_balance
+    if (selectedPaymentType.value === 1) {
+      if (res?.sota_balance !== undefined) {
+        boxConfig.value.sota_balance = res.sota_balance
+      } else {
+        await getBoxConfig()
+      }
     } else {
-      // 重新获取配置以更新余额
-      await getBoxConfig()
+      if (res?.x101_balance !== undefined) {
+        boxConfig.value.x101_balance = res.x101_balance
+      } else {
+        await getBoxConfig()
+      }
     }
 
     // 显示结果弹窗
     showResultPopup.value = true
 
-    // 刷新抽奖记录（无论当前是哪个 tab 都刷新）
     refreshDrawRecords()
 
-    // 如果抽中的是算力，也刷新算力订单
     if (res?.box_type === BOX_TYPE.POWER) {
       refreshOrderRecords()
     }
@@ -449,7 +460,7 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 盲盒信息卡片 - 重新设计为紧凑布局 -->
+      <!-- 盲盒信息卡片 -->
       <div class="box-info-card">
         <!-- 左侧：价格信息 -->
         <div class="price-section">
@@ -466,7 +477,7 @@ onMounted(async () => {
             <span class="price-unit">USDT</span>
           </div>
           <div class="price-convert">
-            <span>≈ {{ formatNumber(needX101, 3) }} SOTA</span>
+            <span>≈ {{ formatNumber(needSOTA, 3) }} SOTA</span>
           </div>
         </div>
 
@@ -480,11 +491,11 @@ onMounted(async () => {
             <span class="balance-label">{{ t('box.myBalance') }}</span>
           </div>
           <div class="balance-value-row">
-            <span class="balance-value">{{ formatNumber(x101Balance, 4) }}</span>
+            <span class="balance-value">{{ formatNumber(sotaBalance, 4) }}</span>
             <span class="balance-unit">SOTA</span>
           </div>
           <div class="x101-price">
-            <span>$</span>{{ formatNumber(x101Price, 4) }}
+            <span>$</span>{{ formatNumber(sotaPrice, 4) }}
           </div>
         </div>
       </div>
@@ -628,6 +639,83 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <!-- 支付方式选择弹窗 -->
+    <van-popup
+      v-model:show="showPaymentPopup"
+      position="bottom"
+      :style="{ background: 'transparent' }"
+      :overlay-style="{ background: 'rgba(0, 0, 0, 0.7)' }"
+      round
+    >
+      <div class="payment-popup">
+        <!-- 标题栏 -->
+        <div class="payment-popup-header">
+          <span class="payment-popup-title">{{ t('box.selectPayment') }}</span>
+          <div class="payment-popup-close" @click="showPaymentPopup = false">
+            <van-icon name="cross" size="20" color="rgba(255,255,255,0.5)" />
+          </div>
+        </div>
+
+        <!-- 支付选项 -->
+        <div class="payment-options">
+          <!-- SOTA 选项 -->
+          <div
+            class="payment-option"
+            :class="{ selected: selectedPaymentType === 1 }"
+            @click="selectedPaymentType = 1"
+          >
+            <div class="option-header">
+              <div class="option-coin-badge sota">SOTA</div>
+              <div class="option-check" v-if="selectedPaymentType === 1">
+                <van-icon name="success" size="18" color="#fff" />
+              </div>
+            </div>
+            <div class="option-need">
+              <span class="option-need-label">{{ t('box.needPay') }}</span>
+              <span class="option-need-value">{{ formatNumber(needSOTA, 3) }}</span>
+            </div>
+            <div class="option-balance">
+              <span class="option-balance-label">{{ t('box.myBalance') }}</span>
+              <span
+                class="option-balance-value"
+                :class="{ 'insufficient': parseFloat(sotaBalance) < parseFloat(needSOTA) }"
+              >{{ formatNumber(sotaBalance, 4) }}</span>
+            </div>
+          </div>
+
+          <!-- X101 选项 -->
+          <div
+            class="payment-option"
+            :class="{ selected: selectedPaymentType === 2 }"
+            @click="selectedPaymentType = 2"
+          >
+            <div class="option-header">
+              <div class="option-coin-badge x101">X101</div>
+              <div class="option-check" v-if="selectedPaymentType === 2">
+                <van-icon name="success" size="18" color="#fff" />
+              </div>
+            </div>
+            <div class="option-need">
+              <span class="option-need-label">{{ t('box.needPay') }}</span>
+              <span class="option-need-value">{{ formatNumber(needX101, 3) }}</span>
+            </div>
+            <div class="option-balance">
+              <span class="option-balance-label">{{ t('box.myBalance') }}</span>
+              <span
+                class="option-balance-value"
+                :class="{ 'insufficient': parseFloat(x101Balance) < parseFloat(needX101) }"
+              >{{ formatNumber(x101Balance, 4) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 确认按钮 -->
+        <button class="payment-confirm-btn" @click="confirmDraw">
+          {{ t('box.confirmPay') }}
+        </button>
+      </div>
+    </van-popup>
 
     <!-- 抽奖结果弹窗 -->
     <van-popup v-model:show="showResultPopup" :style="{ background: 'transparent' }"
@@ -1492,6 +1580,170 @@ onMounted(async () => {
 
   .van-pull-refresh__head {
     color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+// 支付方式选择弹窗
+.payment-popup {
+  background: linear-gradient(180deg, #1A0B2E 0%, #0F0518 100%);
+  border-radius: 32px 32px 0 0;
+  padding: 32px 30px 50px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 32px 32px 0 0;
+    padding: 2px 2px 0;
+    background: linear-gradient(334deg, #320041 9.54%, #fff 97.8%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .payment-popup-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+
+    .payment-popup-title {
+      font-size: 32px;
+      font-weight: 600;
+      color: #fff;
+      font-family: 'PingFang SC', sans-serif;
+    }
+
+    .payment-popup-close {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  }
+
+  .payment-options {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 36px;
+    position: relative;
+    z-index: 1;
+
+    .payment-option {
+      flex: 1;
+      padding: 24px 20px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+
+      &.selected {
+        border-color: #F903A4;
+        background: rgba(249, 3, 164, 0.08);
+      }
+
+      .option-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .option-coin-badge {
+          padding: 6px 18px;
+          border-radius: 20px;
+          font-size: 24px;
+          font-weight: 700;
+          font-family: 'Roboto', sans-serif;
+          color: #fff;
+
+          &.sota {
+            background: linear-gradient(135deg, #F903A4 0%, #8A04FF 100%);
+          }
+
+          &.x101 {
+            background: linear-gradient(135deg, #16FFC2 0%, #00B8FF 100%);
+            color: #000;
+          }
+        }
+
+        .option-check {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #F903A4 0%, #8A04FF 100%);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+      }
+
+      .option-need,
+      .option-balance {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .option-need-label,
+        .option-balance-label {
+          font-size: 20px;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.45);
+          font-family: 'PingFang SC', sans-serif;
+        }
+
+        .option-need-value {
+          font-size: 28px;
+          font-weight: 700;
+          color: #fff;
+          font-family: 'Roboto', sans-serif;
+        }
+
+        .option-balance-value {
+          font-size: 24px;
+          font-weight: 600;
+          color: #16FFC2;
+          font-family: 'Roboto', sans-serif;
+
+          &.insufficient {
+            color: #FF6B6B;
+          }
+        }
+      }
+    }
+  }
+
+  .payment-confirm-btn {
+    width: 100%;
+    height: 88px;
+    border: none;
+    border-radius: 44px;
+    background: linear-gradient(135deg, #F903A4 0%, #8A04FF 100%);
+    box-shadow: 0 8px 32px rgba(249, 3, 164, 0.5);
+    font-size: 30px;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'PingFang SC', sans-serif;
+    cursor: pointer;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s ease;
+
+    &:active {
+      transform: scale(0.98);
+      box-shadow: 0 4px 16px rgba(249, 3, 164, 0.4);
+    }
   }
 }
 
