@@ -33,40 +33,51 @@ const props = defineProps({
 const emit = defineEmits(['update:show', 'confirm'])
 
 // 路由合约地址
-const ROUTER_ADDRESS = '0x1F7CdA03D18834C8328cA259AbE57Bf33c46647c'
+const ROUTER_ADDRESS = '0x3E4B742Df4A654F8aaF98B0BBcBAbBf507BF8b53'
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const WPYTHIA_ADDRESS = '0x504453e7DcF9C6f4c776679498e2b32efc0a9f6b'
 
-// X101对ADX的价格
+// PYTHIA 对 SOTA 的价格
 const exchangePrice = ref('')
 
 // 确认中状态
 const isConfirming = ref(false)
+
+const pythiaCoin = computed(() => {
+  return props.coinList.find((coin) => coin.name === 'PYTHIA') || props.coinList[0] || null
+})
+
+const sotaCoin = computed(() => {
+  return props.coinList.find((coin) => coin.name === 'SOTA') || props.coinList[1] || null
+})
 
 // 关闭弹窗
 const closePopup = () => {
   emit('update:show', false)
 }
 
-// 获取路由兑换价格 1 X101 = ? ADX
+// 获取路由兑换价格 1 PYTHIA = ? SOTA
 const getExchangePrice = async () => {
-  if (props.coinList.length < 2) return
-
-  const x101Coin = props.coinList.find((c) => c.name === 'X101')
-  const adxCoin = props.coinList.find((c) => c.name === 'ADX')
-
-  if (!x101Coin || !adxCoin) return
+  if (!pythiaCoin.value || !sotaCoin.value) return
 
   try {
-    const path = [x101Coin.contract_address, adxCoin.contract_address]
+    const fromAddress = pythiaCoin.value.contract_address === ZERO_ADDRESS
+      ? WPYTHIA_ADDRESS
+      : pythiaCoin.value.contract_address
+    const toAddress = sotaCoin.value.contract_address === ZERO_ADDRESS
+      ? WPYTHIA_ADDRESS
+      : sotaCoin.value.contract_address
+    const path = [fromAddress, toAddress]
     const price = await web3.getAmountsOut(
       ROUTER_ADDRESS,
-      '1', // 1 X101
+      '1',
       path,
-      x101Coin.decimals,
-      adxCoin.decimals
+      pythiaCoin.value.decimals,
+      sotaCoin.value.decimals
     )
-    // 截取6位,不用分隔符,完整传后端
+
     exchangePrice.value = parseFloat(price).toFixed(6)
-    console.log('1 X101 = ', exchangePrice.value, 'ADX')
+    console.log('1 PYTHIA = ', exchangePrice.value, 'SOTA')
   } catch (error) {
     console.error('获取兑换价格失败:', error)
   }
@@ -88,20 +99,30 @@ const handleConfirm = async () => {
   if (isConfirming.value) {
     return
   }
-  
-  const x101Coin = props.coinList.find((c) => c.name === 'X101')
-  const adxCoin = props.coinList.find((c) => c.name === 'ADX')
 
-  if (!x101Coin || !adxCoin) {
+  if (!pythiaCoin.value || !sotaCoin.value) {
     showToast('币种信息错误')
     return
   }
 
-  const amount1 = props.inputAmounts[x101Coin.name] // X101数量
-  const amount2 = props.inputAmounts[adxCoin.name] // ADX数量
+  const amount1 = props.inputAmounts[pythiaCoin.value.name]
+  const amount2 = props.inputAmounts[sotaCoin.value.name]
 
   if (!amount1 || !amount2) {
     showToast('请输入数量')
+    return
+  }
+
+  const pythiaBalance = parseFloat(props.chainBalances[pythiaCoin.value.name] || 0)
+  const sotaBalance = parseFloat(props.chainBalances[sotaCoin.value.name] || 0)
+
+  if (parseFloat(amount1) > pythiaBalance) {
+    showToast(`${pythiaCoin.value.name}余额不足`)
+    return
+  }
+
+  if (parseFloat(amount2) > sotaBalance) {
+    showToast(`${sotaCoin.value.name}余额不足`)
     return
   }
 
@@ -112,7 +133,7 @@ const handleConfirm = async () => {
 
   try {
     isConfirming.value = true
-    
+
     // 显示加载提示
     showLoadingToast({
       message: '获取订单中...',
@@ -122,9 +143,9 @@ const handleConfirm = async () => {
 
     // 调用接口获取订单信息
     const res = await api.power.lpMiningGetOrder({
-      amount1: amount1, // X101数量
-      amount2: amount2, // ADX数量
-      price: exchangePrice.value // X101=>ADX价格
+      amount1,
+      amount2,
+      price: exchangePrice.value
     })
 
     closeToast()
@@ -145,12 +166,31 @@ const handleConfirm = async () => {
 const handleDualPayment = async (orderInfo) => {
   try {
     const { recharge_contract_address, data, need_pay_x101, need_pay_adx } = orderInfo
-    // 调用双币支付方法
-    const tx = await web3.payWithDualToken({
+    const normalizedPythiaToken = {
+      ...need_pay_x101,
+      name: pythiaCoin.value?.name || need_pay_x101?.name,
+      symbol: pythiaCoin.value?.name || need_pay_x101?.symbol,
+      address: pythiaCoin.value?.contract_address || need_pay_x101?.address,
+      decimals: pythiaCoin.value?.decimals ?? need_pay_x101?.decimals ?? 18,
+      img: pythiaCoin.value?.img || need_pay_x101?.img,
+      is_native: pythiaCoin.value?.contract_address === ZERO_ADDRESS
+    }
+    const normalizedSotaToken = {
+      ...need_pay_adx,
+      name: sotaCoin.value?.name || need_pay_adx?.name,
+      symbol: sotaCoin.value?.name || need_pay_adx?.symbol,
+      address: sotaCoin.value?.contract_address || need_pay_adx?.address,
+      decimals: sotaCoin.value?.decimals ?? need_pay_adx?.decimals ?? 18,
+      img: sotaCoin.value?.img || need_pay_adx?.img
+    }
+
+    // LP 链路单独兼容 PYTHIA 原生币 + SOTA 代币，不影响其他双 ERC20 场景
+    const tx = await web3.payWithLpDualAsset({
       contractAddress: recharge_contract_address,
       data: data,
-      token1: need_pay_x101,
-      token2: need_pay_adx
+      token1: normalizedPythiaToken,
+      token2: normalizedSotaToken,
+      value: orderInfo?.value
     })
     // 关闭弹窗
     closePopup()
@@ -165,12 +205,8 @@ const handleDualPayment = async (orderInfo) => {
 </script>
 
 <template>
-  <van-popup
-    :show="show"
-    position="bottom"
-    :style="{ background: 'transparent', padding: '0 26px 72px' }"
-    :overlay-style="{ backdropFilter: 'blur(4px)' }"
-    @click-overlay="closePopup">
+  <van-popup :show="show" position="bottom" :style="{ background: 'transparent', padding: '0 26px 72px' }"
+    :overlay-style="{ backdropFilter: 'blur(4px)' }" @click-overlay="closePopup">
     <div class="liquidity-popup">
       <div class="flex items-center justify-between w-100%">
         <!-- 标题 -->
@@ -186,17 +222,11 @@ const handleDualPayment = async (orderInfo) => {
       <div class="section-title">{{ t('miningPopup.stakeToken') }}</div>
       <div class="coin-type-box">
         <div class="coin-icons">
-          <van-image
-            v-for="(coin, index) in coinList"
-            :key="coin.id"
-            :class="[index > 0 ? '-ml-14' : '']"
-            width="22"
-            height="22"
-            :src="coin.img"
-            fit="contain"></van-image>
+          <van-image v-for="(coin, index) in coinList" :key="coin.id" :class="[index > 0 ? '-ml-14' : '']" width="22"
+            height="22" :src="coin.img" fit="contain"></van-image>
         </div>
         <span class="coin-type-text">
-          {{ coinList.map((c) => c.name).join(' + ') }}
+          {{coinList.map((c) => c.name).join(' + ')}}
         </span>
       </div>
 
@@ -210,7 +240,8 @@ const handleDualPayment = async (orderInfo) => {
           </div>
           <div class="flex flex-col items-end gap-4">
             <span class="amount">{{ formatNumber(inputAmounts[coin.name] || 0, 3) }}</span>
-            <span class="balance">{{ t('miningPopup.balance') }}: {{ formatNumber(chainBalances[coin.name] || 0, 3) }}</span>
+            <span class="balance">{{ t('miningPopup.balance') }}: {{ formatNumber(chainBalances[coin.name] || 0, 3)
+            }}</span>
           </div>
         </div>
       </div>
@@ -218,18 +249,16 @@ const handleDualPayment = async (orderInfo) => {
       <!-- 汇率信息 -->
       <div v-if="exchangePrice" class="exchange-rate">
         <div class="dot"></div>
-        <span>1 X101 ≈ {{ exchangePrice }} ADX</span>
+        <span>1 {{ pythiaCoin?.name || 'PYTHIA' }} ≈ {{ exchangePrice }} {{ sotaCoin?.name || 'SOTA' }}</span>
       </div>
 
       <!-- 确定按钮 -->
-      <div
-        @click="handleConfirm"
-        :class="[
-          'confirm-btn',
-          {
-            disabled: !inputAmounts[coinList[0]?.name] || !inputAmounts[coinList[1]?.name] || isConfirming
-          }
-        ]">
+      <div @click="handleConfirm" :class="[
+        'confirm-btn',
+        {
+          disabled: !inputAmounts[coinList[0]?.name] || !inputAmounts[coinList[1]?.name] || isConfirming
+        }
+      ]">
         <span v-if="isConfirming">{{ t('miningPopup.adding') }}...</span>
         <span v-else>{{ t('miningPopup.immediatelyAdd') }}</span>
       </div>
@@ -263,7 +292,7 @@ const handleDualPayment = async (orderInfo) => {
     z-index: 0;
   }
 
-  > * {
+  >* {
     position: relative;
     z-index: 1;
   }
@@ -280,6 +309,7 @@ const handleDualPayment = async (orderInfo) => {
   cursor: pointer;
   z-index: 2;
   transition: transform 0.2s ease;
+
   &:active {
     transform: scale(0.9);
   }

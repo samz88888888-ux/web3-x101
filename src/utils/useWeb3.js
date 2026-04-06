@@ -12,6 +12,9 @@ const GAS_LIMITS = {
   contractCall: 1000000
 }
 
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const NATIVE_PAYMENT_NAMES = ['PYT', 'PYTHIA']
+
 const isWalletInstalled = () => {
   if (typeof window === 'undefined') return false
 
@@ -890,6 +893,18 @@ const normalizeNativeValue = (value, fallbackAmount, decimals = 18) => {
   return ethers.parseUnits((fallbackAmount || '0').toString(), decimals)
 }
 
+const isNativePaymentToken = (token) => {
+  if (!token) return false
+
+  const normalizedName = (token.name || token.symbol || '').toUpperCase()
+  const normalizedAddress = (token.address || token.contract_address || '').toLowerCase()
+
+  return token.is_native === true ||
+    token.is_native === 1 ||
+    normalizedAddress === ZERO_ADDRESS.toLowerCase() ||
+    NATIVE_PAYMENT_NAMES.includes(normalizedName)
+}
+
 // 原生币支付（服务端下发 data，交易通过 value 支付主币）
 export const payWithNativeCoinOnly = async (orderData) => {
   await ensureReady()
@@ -1281,6 +1296,120 @@ export const payWithDualToken = async (orderInfo) => {
   }
 }
 
+// LP 双币支付（兼容 1 个原生币 + 1 个 ERC20）
+export const payWithLpDualAsset = async (orderInfo) => {
+  await ensureReady()
+
+  const { contractAddress, data, token1, token2, value } = orderInfo
+  const tokens = [token1, token2].filter(Boolean)
+  const nativeToken = tokens.find((token) => isNativePaymentToken(token))
+  const erc20Token = tokens.find((token) => token && !isNativePaymentToken(token))
+
+  // 如果不是原生币 + ERC20 组合，则回退到原有双 ERC20 流程，避免影响其他情况
+  if (!nativeToken || !erc20Token) {
+    return payWithDualToken(orderInfo)
+  }
+
+  try {
+    console.log('==================== 开始 LP 原生币 + 代币支付 ====================')
+
+    const nativeDecimals = nativeToken.decimals ?? config.network.nativeCurrency.decimals ?? 18
+    const nativeAmountWei = normalizeNativeValue(value, nativeToken.amount, nativeDecimals)
+
+    showLoadingToast({
+      message: `检查${nativeToken.name}余额...`,
+      duration: 0
+    })
+
+    const nativeBalance = await getNativeBalance()
+    if (nativeBalance < nativeAmountWei) {
+      closeToast()
+      showToast(`${nativeToken.name}余额不足`)
+      return Promise.reject(new Error(`${nativeToken.name}余额不足`))
+    }
+
+    showLoadingToast({
+      message: `检查${erc20Token.name}余额...`,
+      duration: 0
+    })
+
+    const erc20Contract = new ethers.Contract(erc20Token.address, config.main.abi, signer)
+    const erc20AmountWei = ethers.parseUnits(erc20Token.amount.toString(), erc20Token.decimals)
+    const erc20Balance = await erc20Contract.balanceOf(signer.address)
+
+    if (erc20Balance < erc20AmountWei) {
+      closeToast()
+      showToast(`${erc20Token.name}余额不足`)
+      return Promise.reject(new Error(`${erc20Token.name}余额不足`))
+    }
+
+    showLoadingToast({
+      message: `检查${erc20Token.name}授权...`,
+      duration: 0
+    })
+
+    const erc20Allowance = await erc20Contract.allowance(signer.address, contractAddress)
+
+    if (erc20Allowance < erc20AmountWei) {
+      showLoadingToast({
+        message: `授权${erc20Token.name}中...`,
+        duration: 0
+      })
+
+      const approveTx = await erc20Contract.approve(contractAddress, ethers.MaxUint256)
+
+      if (approveTx.hash) {
+        showLoadingToast({
+          message: `${erc20Token.name}授权确认中...`,
+          duration: 0
+        })
+      }
+
+      await approveTx.wait()
+    }
+
+    showLoadingToast({
+      message: '发起支付中...',
+      duration: 0
+    })
+
+    const tx = await signer.sendTransaction({
+      to: contractAddress,
+      data,
+      value: nativeAmountWei,
+      gasLimit: GAS_LIMITS.contractCall
+    })
+
+    if (tx.hash) {
+      showLoadingToast({
+        message: '链上确认中...',
+        duration: 0
+      })
+    }
+
+    await tx.wait()
+
+    closeToast()
+    showToast('支付成功')
+
+    console.log('==================== LP 原生币 + 代币支付完成 ====================')
+
+    return Promise.resolve(tx)
+  } catch (error) {
+    console.error('==================== LP 原生币 + 代币支付失败 ====================')
+    console.error('错误类型:', error.code)
+    console.error('错误信息:', error.message)
+    console.error('完整错误:', error)
+    console.error('====================================================')
+
+    closeToast()
+    if (!error.message.includes('余额不足')) {
+      showToast('支付失败')
+    }
+    return Promise.reject(error)
+  }
+}
+
 export default {
   get provider() {
     return provider
@@ -1306,5 +1435,6 @@ export default {
   payWithNativeCoinOnly,
   payWithTokenOnly,
   payWithDualToken,
+  payWithLpDualAsset,
   getAmountsOut
 }
