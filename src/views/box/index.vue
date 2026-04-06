@@ -586,7 +586,8 @@ onMounted(async () => {
                   </div>
                   <div class="record-info">
                     <span class="record-time">{{ formatTime(item.created_at) }}</span>
-                    <span class="record-sub">-{{ formatNumber(item.sub_x101, 3) }} SOTA</span>
+                    <span class="record-sub">-{{ formatNumber(item.sub_x101, 3) }} {{ Number(item.amount_type) === 2 ? 'X101' :
+                      'SOTA' }}</span>
                   </div>
                 </div>
                 <div class="record-right">
