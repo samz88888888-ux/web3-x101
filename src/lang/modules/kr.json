@@ -89,6 +89,7 @@
     "paymentAmount": "결제 수량",
     "paymentToken": "결제 토큰",
     "chainBalance": "잔액",
+    "chainBalanceText": "DAPP 잔액:",
     "noTokenInfo": "토큰 정보 없음",
     "confirm": "확인",
     "powerData": "파워 데이터",

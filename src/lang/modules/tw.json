@@ -89,6 +89,7 @@
     "paymentAmount": "支付數量",
     "paymentToken": "支付代幣",
     "chainBalance": "鏈上餘額",
+    "chainBalanceText": "DAPP餘額:",
     "noTokenInfo": "暫無代幣信息",
     "confirm": "確定",
     "powerData": "算力數據",

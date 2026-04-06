@@ -89,6 +89,7 @@
     "paymentAmount": "Số tiền thanh toán",
     "paymentToken": "Token thanh toán",
     "chainBalance": "Số dư",
+    "chainBalanceText": "DAPP Balance:",
     "noTokenInfo": "Không có thông tin token",
     "confirm": "Xác nhận",
     "powerData": "Dữ liệu Power",

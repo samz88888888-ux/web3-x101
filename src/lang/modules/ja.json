@@ -89,6 +89,7 @@
     "paymentAmount": "支払い数量",
     "paymentToken": "支払いトークン",
     "chainBalance": "残高",
+    "chainBalanceText": "DAPP Balance:",
     "noTokenInfo": "トークン情報なし",
     "confirm": "確認",
     "powerData": "パワーデータ",
