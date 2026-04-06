@@ -1,0 +1,34 @@
+{
+  "code": 200,
+  "local": "CN",
+  "message": "",
+  "data": {
+    "market_cap": "13186135.229042454681",
+    "volume_u_24h": "2972.502260",
+    "fdv": "13186135.229042454681",
+    "tvl": "4428176.793719000000",
+    "me_lp_amount": 0,
+    "me_lp_power": 0,
+    "adx_price": 1.36,
+    "asset_lp_config": {
+      "open_enable": "0",
+      "min_amount": "1"
+    },
+    "coin_list": {
+      "x101": {
+        "id": 2,
+        "name": "SOTA",
+        "contract_address": "0xA34CA644f513FF7f94874578858C08c0cc3F5524",
+        "decimals": 18,
+        "img": "https:\/\/oss.sobottaprotocol.com\/upload\/images\/d800fcecbb294bce2ac37b2c7a555cd2.png"
+      },
+      "adx": {
+        "id": 6,
+        "name": "MCN",
+        "contract_address": "0xDb7921A872f3496c468BeE57B2a572d0B732E846",
+        "decimals": 18,
+        "img": "https:\/\/oss.sobottaprotocol.com\/upload\/images\/b71b936034502a8f79c947fa2fe04509.png"
+      }
+    }
+  }
+}

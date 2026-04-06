@@ -143,7 +143,7 @@ const menuList = ref([
     id: 2,
     image: menuThree,
     title: t('home.liquidityMinting'),
-    turn: false,
+    turn: true,
     link: '/lp-mining'
   },
   // {

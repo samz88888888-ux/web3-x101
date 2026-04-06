@@ -468,61 +468,40 @@ const handleAddLiquidity = async (data) => {
         <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
         <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">LP流动性挖矿</span>
       </div>
-      <div
-        class="power-container mt-20 w-100% flex-col pt-40 px-25 pb-50 items-start justify-center">
+      <div class="power-container mt-20 w-100% flex-col pt-40 px-25 pb-50 items-start justify-center">
         <div class="h-81 w-100% flex items-center justify-center gap-26">
-          <van-image
-            v-if="coinList[0]"
-            width="40"
-            height="40"
-            :src="getCoinIcon(coinList[0])"
+          <van-image v-if="coinList[0]" width="40" height="40" :src="getCoinIcon(coinList[0])"
             fit="contain"></van-image>
           <van-image width="9" height="18" :src="addIcon" fit="contain"></van-image>
-          <van-image
-            v-if="coinList[1]"
-            width="40"
-            height="40"
-            :src="getCoinIcon(coinList[1])"
+          <van-image v-if="coinList[1]" width="40" height="40" :src="getCoinIcon(coinList[1])"
             fit="contain"></van-image>
         </div>
-        <span
-          class="block mt-23 fsize-30 text-center font-roboto font-700 text-[#fff] leading-normal"
-          >ADX-X101 {{ t('lpMining.lpMiningPool') }}</span
-        >
+        <span class="block mt-23 fsize-30 text-center font-roboto font-700 text-[#fff] leading-normal">PYTHIA-SOTA {{
+          t('lpMining.lpMiningPool') }}</span>
         <div class="flex items-center justify-center gap-12 mt-13 w-100%">
-          <span
-            class="block fsize-20 text-center font-roboto font-500 text-[#fff] leading-normal opacity-60"
-            >{{ t('lpMining.provideLiquidityToGetPowerReward') }}</span
-          >
-          <span class="price-badge px-12 py-4 rounded-8 fsize-18 font-roboto font-500 text-[#fff]"
-            >ADX: ${{ adxPrice }}</span
-          >
+          <span class="block fsize-20 text-center font-roboto font-500 text-[#fff] leading-normal opacity-60">{{
+            t('lpMining.provideLiquidityToGetPowerReward') }}</span>
+          <span class="price-badge px-12 py-4 rounded-8 fsize-18 font-roboto font-500 text-[#fff]">PYTHIA: ${{ adxPrice
+            }}</span>
         </div>
 
         <!-- 列表展示 -->
-        <div
-          v-for="(row, rowIndex) in miningCards"
-          :key="rowIndex"
+        <div v-for="(row, rowIndex) in miningCards" :key="rowIndex"
           :class="['flex items-center justify-between gap-21', rowIndex === 0 ? 'mt-30' : 'mt-21']">
-          <div
-            v-for="(item, itemIndex) in row"
-            :key="itemIndex"
+          <div v-for="(item, itemIndex) in row" :key="itemIndex"
             class="out-coin flex py-22 px-20 gap-12 rounded-20 items-center justify-start flex-1 h-128">
             <van-image width="16" height="16" :src="checkedIcon" fit="contain"> </van-image>
             <div class="flex flex-col items-start justify-center flex-1">
               <div class="flex items-baseline gap-4">
                 <span class="fsize-26 font-roboto font-700 text-[#fff] lh-40">{{
                   item.value
-                }}</span>
-                <span
-                  v-if="item.unit"
-                  class="fsize-20 font-roboto font-400 text-[#fff] lh-40 opacity-50"
-                  >{{ item.unit }}</span
-                >
+                  }}</span>
+                <span v-if="item.unit" class="fsize-20 font-roboto font-400 text-[#fff] lh-40 opacity-50">{{ item.unit
+                  }}</span>
               </div>
               <span class="fsize-20 font-roboto font-400 text-[#fff] lh-32 opacity-60">{{
                 item.label
-              }}</span>
+                }}</span>
             </div>
           </div>
         </div>
@@ -533,80 +512,55 @@ const handleAddLiquidity = async (data) => {
           <!-- <span class="fsize-24 text-[rgba(255,255,255,0.6)] font-pingfang font-400 leading-none"
             >最小投资:{{ config.min_amount }} U | 倍数:{{ config.multiple_amount }}</span
           > -->
-          <span class="fsize-24 text-[rgba(255,255,255,0.6)] font-pingfang font-400 leading-none"
-            >{{ t('lpMining.minimumInvestment') }}: {{ config.min_amount }} U
+          <span class="fsize-24 text-[rgba(255,255,255,0.6)] font-pingfang font-400 leading-none">{{
+            t('lpMining.minimumInvestment') }}: {{ config.min_amount }} U
           </span>
         </div>
       </div>
 
       <!-- 提供流动性 -->
       <div class="flex mt-30 flex-col items-start justify-start gap-30">
-        <div
-          class="power-container flex flex-col items-center justify-start w-100% pt-44 pb-55 px-30">
+        <div class="power-container flex flex-col items-center justify-start w-100% pt-44 pb-55 px-30">
           <div class="flex gap-12 items-center justify-start w-100%">
             <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
             <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
               t('lpMining.provideLiquidity')
-            }}</span>
+              }}</span>
           </div>
           <div class="flex flex-col items-start justify-center w-100%">
             <!-- 循环渲染币种输入框 -->
-            <div
-              v-for="(coin, index) in coinList"
-              :key="coin.id"
-              :class="['w-100%', index > 0 ? 'mt-30' : 'mt-30']">
+            <div v-for="(coin, index) in coinList" :key="coin.id" :class="['w-100%', index > 0 ? 'mt-30' : 'mt-30']">
               <div class="flex items-center justify-between w-100%">
                 <div class="flex items-center gap-10">
-                  <van-image
-                    width="24"
-                    height="24"
-                    :src="getCoinIcon(coin)"
-                    fit="contain"></van-image>
+                  <van-image width="24" height="24" :src="getCoinIcon(coin)" fit="contain"></van-image>
                   <span class="block fsize-28 font-roboto font-700 text-[#fff] leading-normal">
                     {{ coin.name }}
                   </span>
                 </div>
-                <span
-                  class="block fsize-24 font-roboto font-400 text-[#fff] leading-normal opacity-60">
+                <span class="block fsize-24 font-roboto font-400 text-[#fff] leading-normal opacity-60">
                   {{ t('lpMining.balance') }}:{{
                     isLoadingBalance ? '加载中...' : formatNumber(getCoinBalance(coin.name), 3)
                   }}
                 </span>
               </div>
-              <div
-                class="box-input mt-24 w-100% h-92 flex px-30 items-center justify-between rounded-20">
-                <input
-                  v-model="inputAmounts[coin.name]"
-                  type="number"
-                  placeholder="输入数量"
+              <div class="box-input mt-24 w-100% h-92 flex px-30 items-center justify-between rounded-20">
+                <input v-model="inputAmounts[coin.name]" type="number" placeholder="输入数量"
                   @focus="handleFocus(coin.name)"
                   class="input-field flex-1 bg-transparent border-none outline-none fsize-28 font-roboto font-500 text-[#fff]" />
-                <span
-                  class="fsize-28 font-roboto font-500 text-[#00FF6E] cursor-pointer"
-                  @click="handleMax(coin.name)"
-                  >Max</span
-                >
+                <span class="fsize-28 font-roboto font-500 text-[#00FF6E] cursor-pointer"
+                  @click="handleMax(coin.name)">Max</span>
               </div>
             </div>
 
             <div class="flex w-100% h-90 mt-30 items-center justify-center">
-              <van-button
-                round
-                color="#00FF6E"
-                :disabled="isButtonDisabled"
+              <van-button round color="#00FF6E" :disabled="isButtonDisabled"
                 class="w-100% h-100% fsize-34 font-roboto font-600 leading-none uppercase"
-                @click="openLiquidityPopup"
-                >{{ t('lpMining.immediatelyProvide') }}</van-button
-              >
+                @click="openLiquidityPopup">{{ t('lpMining.immediatelyProvide') }}</van-button>
             </div>
-            <div
-              v-if="isButtonDisabled"
-              class="flex items-center justify-center gap-8 mt-16 w-100%">
+            <div v-if="isButtonDisabled" class="flex items-center justify-center gap-8 mt-16 w-100%">
               <van-image width="12" height="12" :src="dotIcon" fit="contain"></van-image>
-              <span
-                class="fsize-20 text-[rgba(255,255,255,0.5)] font-pingfang font-400 leading-none"
-                >{{ t('lpMining.cannotProvideLiquidity') }}</span
-              >
+              <span class="fsize-20 text-[rgba(255,255,255,0.5)] font-pingfang font-400 leading-none">{{
+                t('lpMining.cannotProvideLiquidity') }}</span>
             </div>
           </div>
         </div>
@@ -614,8 +568,7 @@ const handleAddLiquidity = async (data) => {
 
       <!-- 挖矿记录 -->
       <div class="flex mt-30 flex-col items-start justify-start">
-        <div
-          class="power-container flex flex-col items-center justify-start w-100% pt-37 pb-55 px-30">
+        <div class="power-container flex flex-col items-center justify-start w-100% pt-37 pb-55 px-30">
           <div class="flex items-center justify-between w-100% mb-24">
             <div class="flex gap-12 items-center justify-start">
               <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
@@ -623,27 +576,21 @@ const handleAddLiquidity = async (data) => {
             </div>
             <span class="fsize-22 font-miSans font-400 text-[#fff] leading-none opacity-60">{{
               t('lpMining.lpMiningOrderTotal', { count: total })
-            }}</span>
+              }}</span>
           </div>
           <div class="log-line"></div>
 
           <!-- 使用 Vant List 组件实现上拉加载和下拉刷新 -->
           <van-pull-refresh v-model="refreshing" @refresh="onRefresh" class="w-100%">
-            <van-list
-              v-model:loading="loading"
-              :finished="finished"
-              :finished-text="lpMiningOrderList.length > 0 ? '没有更多了' : ''"
-              @load="onLoad"
-              class="log-list">
+            <van-list v-model:loading="loading" :finished="finished"
+              :finished-text="lpMiningOrderList.length > 0 ? '没有更多了' : ''" @load="onLoad" class="log-list">
               <!-- 空状态 -->
               <div v-if="lpMiningOrderList.length === 0 && !loading" class="empty-state">
                 <van-empty :description="t('lpMining.noLPOrder')" />
               </div>
 
               <!-- 列表项 -->
-              <div
-                v-for="(item, index) in lpMiningOrderList"
-                :key="item.order_no || index"
+              <div v-for="(item, index) in lpMiningOrderList" :key="item.order_no || index"
                 class="flex flex-col items-start justify-center gap-25 w-100%">
                 <div class="log-line"></div>
                 <div class="flex flex-col w-100% gap-16 pb-20 items-start justify-center">
@@ -651,9 +598,8 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.orderNumber')
-                    }}</span>
-                    <span
-                      class="fsize-22 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
+                      }}</span>
+                    <span class="fsize-22 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.order_no }}
                     </span>
                   </div>
@@ -661,7 +607,7 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.payToken')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ formatNumber(item.coin1_amount || 0, 3) }} {{ item.coin1 }} +
                       {{ formatNumber(item.coin2_amount || 0, 3) }} {{ item.coin2 }}
@@ -671,7 +617,7 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.investmentQuantity')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ formatNumber(item.base_amount || 0, 3) }} U
                     </span>
@@ -680,7 +626,7 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.lpQuantity')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#16FFC2] leading-normal">
                       {{ formatNumber(item.lp_amount || 0, 3) }}
                     </span>
@@ -689,7 +635,7 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.totalPower')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#16FFC2] leading-normal">
                       +{{ formatNumber(item.total_power || 0, 3) }}
                     </span>
@@ -698,9 +644,8 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.date')
-                    }}</span>
-                    <span
-                      class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
+                      }}</span>
+                    <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.created_at }}
                     </span>
                   </div>
@@ -708,25 +653,17 @@ const handleAddLiquidity = async (data) => {
                   <div class="flex items-center justify-between w-100% mt-8">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('lpMining.status')
-                    }}</span>
+                      }}</span>
                     <div class="flex items-center gap-16">
-                      <span
-                        :class="[
-                          'fsize-24 font-pingfang font-500 leading-normal',
-                          item.state === 1 ? 'text-[#16FFC2]' : 'text-[#fff] opacity-60'
-                        ]">
+                      <span :class="[
+                        'fsize-24 font-pingfang font-500 leading-normal',
+                        item.state === 1 ? 'text-[#16FFC2]' : 'text-[#fff] opacity-60'
+                      ]">
                         {{ item.state === 1 ? t('lpMining.inProgress') : t('lpMining.redeemed') }}
                       </span>
                       <!-- 赎回按钮 -->
-                      <van-button
-                        v-if="item.state === 1"
-                        round
-                        size="small"
-                        color="#00FF6E"
-                        class="redeem-btn"
-                        @click="handleRedeem(item.order_no)"
-                        >{{ t('lpMining.redeem') }}</van-button
-                      >
+                      <van-button v-if="item.state === 1" round size="small" color="#00FF6E" class="redeem-btn"
+                        @click="handleRedeem(item.order_no)">{{ t('lpMining.redeem') }}</van-button>
                     </div>
                   </div>
                 </div>
@@ -738,12 +675,8 @@ const handleAddLiquidity = async (data) => {
     </div>
 
     <!-- 流动性添加弹窗 -->
-    <LiquidityPopup
-      v-model:show="showLiquidityPopup"
-      :coin-list="coinList"
-      :input-amounts="inputAmounts"
-      :chain-balances="chainBalances"
-      @confirm="handleAddLiquidity" />
+    <LiquidityPopup v-model:show="showLiquidityPopup" :coin-list="coinList" :input-amounts="inputAmounts"
+      :chain-balances="chainBalances" @confirm="handleAddLiquidity" />
   </div>
 </template>
 <style lang="scss" scoped>
@@ -775,11 +708,9 @@ const handleAddLiquidity = async (data) => {
   --Linear: linear-gradient(334deg, #3fff6c 9.54%, #fff 97.8%);
   --Style: linear-gradient(180deg, #00ff6e 0%, #009543 100%);
   --bgColor: linear-gradient(180deg, #352700 0%, #1d170b 12.2%, #030202 81.32%);
-  --Radial: radial-gradient(
-    106.52% 106.52% at 50% 50%,
-    rgba(0, 32, 19, 0.95) 42.79%,
-    rgba(0, 255, 128, 0.7) 100%
-  );
+  --Radial: radial-gradient(106.52% 106.52% at 50% 50%,
+      rgba(0, 32, 19, 0.95) 42.79%,
+      rgba(0, 255, 128, 0.7) 100%);
 
   .body {
     width: 100%;
@@ -867,6 +798,7 @@ const handleAddLiquidity = async (data) => {
   background: var(--Style, linear-gradient(180deg, #00ff6e 0%, #009543 100%));
   box-shadow: 0 0 8px 0 rgba(0, 255, 110, 0.25) inset;
 }
+
 .log-line {
   width: 100%;
   height: 1px;
