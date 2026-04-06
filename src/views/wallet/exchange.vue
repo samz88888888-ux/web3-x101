@@ -494,7 +494,7 @@ onMounted(async () => {
         <div v-if="exchangeRate && parseFloat(exchangeRate) > 0" class="exchange-rate-info">
           <div class="rate-item">
             <span class="rate-label">{{ t('exchange.exchangeRate') }}</span>
-            <span class="rate-value">1 {{ inputTokenName }} ≈ {{ formatNumber(exchangeRate, 4) }}
+            <span class="rate-value">1 {{ inputTokenName }} ≈ {{ formatNumber(exchangeRate, 6) }}
               {{ outputTokenName }}</span>
           </div>
           <!-- <div class="rate-item">
