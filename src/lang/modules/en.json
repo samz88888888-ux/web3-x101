@@ -148,7 +148,7 @@
     "prepareExchange": "Preparing...",
     "checkAuthorization": "Checking authorization...",
     "exchangeSuccess": "Exchange successful",
-    "userCancelTransaction": "User canceled",
+    "userCancelTransaction": "Payment canceled",
     "exchangeFailed": "Exchange failed",
     "dataFormatError": "Data format error",
     "getConfigInfoFailed": "Failed to load config",

@@ -148,7 +148,7 @@
     "prepareExchange": "กำลังเตรียม...",
     "checkAuthorization": "กำลังตรวจสอบการอนุญาต...",
     "exchangeSuccess": "แลกเปลี่ยนสำเร็จ",
-    "userCancelTransaction": "ยกเลิกแล้ว",
+    "userCancelTransaction": "คุณได้ยกเลิกการชำระเงิน",
     "exchangeFailed": "แลกเปลี่ยนล้มเหลว",
     "dataFormatError": "ข้อผิดพลาดรูปแบบข้อมูล",
     "getConfigInfoFailed": "โหลดการกำหนดค่าล้มเหลว",

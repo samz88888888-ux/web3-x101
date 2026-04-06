@@ -1,5 +1,6 @@
 import { ethers } from 'ethers'
 import config from '@/config'
+import { i18n } from '@/lang'
 import { showToast, showLoadingToast, closeToast } from 'vant'
 // abiMap["single"] = '[{"internalType": "address", "name": "contractAddress", "type": "address"},{"internalType": "uint256", "name": "amount", "type": "uint256"},{"internalType": "string", "name": "remark", "type": "string"}]';
 // abiMap["double"] = '[{"internalType": "address", "name": "contractAddress", "type": "address"},{"internalType": "uint256", "name": "amount", "type": "uint256"},{"internalType": "address", "name": "contractAddress1", "type": "address"},{"internalType": "uint256", "name": "amount1", "type": "uint256"},{"internalType": "string", "name": "remark", "type": "string"}]';
@@ -905,6 +906,12 @@ const isNativePaymentToken = (token) => {
     NATIVE_PAYMENT_NAMES.includes(normalizedName)
 }
 
+const isUserRejectedError = (error) => {
+  return error?.code === 'ACTION_REJECTED' ||
+    error?.code === 4001 ||
+    error?.info?.error?.code === 4001
+}
+
 // 原生币支付（服务端下发 data，交易通过 value 支付主币）
 export const payWithNativeCoinOnly = async (orderData) => {
   await ensureReady()
@@ -1396,6 +1403,12 @@ export const payWithLpDualAsset = async (orderInfo) => {
 
     return Promise.resolve(tx)
   } catch (error) {
+    if (isUserRejectedError(error)) {
+      closeToast()
+      showToast(i18n.global.t('exchange.userCancelTransaction'))
+      return Promise.reject(error)
+    }
+
     console.error('==================== LP 原生币 + 代币支付失败 ====================')
     console.error('错误类型:', error.code)
     console.error('错误信息:', error.message)

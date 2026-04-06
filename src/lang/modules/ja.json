@@ -147,7 +147,7 @@
     "prepareExchange": "準備中...",
     "checkAuthorization": "承認確認中...",
     "exchangeSuccess": "交換成功",
-    "userCancelTransaction": "キャンセル",
+    "userCancelTransaction": "お支払いをキャンセルしました",
     "exchangeFailed": "交換失敗",
     "dataFormatError": "データ形式エラー",
     "getConfigInfoFailed": "設定読み込み失敗",

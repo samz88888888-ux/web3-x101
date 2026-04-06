@@ -148,7 +148,7 @@
     "prepareExchange": "Mempersiapkan...",
     "checkAuthorization": "Memeriksa otorisasi...",
     "exchangeSuccess": "Pertukaran berhasil",
-    "userCancelTransaction": "Dibatalkan",
+    "userCancelTransaction": "Pembayaran dibatalkan",
     "exchangeFailed": "Pertukaran gagal",
     "dataFormatError": "Format data salah",
     "getConfigInfoFailed": "Gagal memuat konfigurasi",

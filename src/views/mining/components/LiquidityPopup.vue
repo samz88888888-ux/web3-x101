@@ -51,6 +51,10 @@ const sotaCoin = computed(() => {
   return props.coinList.find((coin) => coin.name === 'SOTA') || props.coinList[1] || null
 })
 
+const isUserRejectedError = (error) => {
+  return error?.code === 'ACTION_REJECTED' || error?.code === 4001 || error?.info?.error?.code === 4001
+}
+
 // 关闭弹窗
 const closePopup = () => {
   emit('update:show', false)
@@ -198,6 +202,10 @@ const handleDualPayment = async (orderInfo) => {
     // 通知父组件刷新
     emit('confirm', { tx })
   } catch (error) {
+    if (isUserRejectedError(error)) {
+      return
+    }
+
     console.error('支付失败:', error)
     throw error
   }

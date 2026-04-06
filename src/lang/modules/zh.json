@@ -148,7 +148,7 @@
     "prepareExchange": "准备兑换...",
     "checkAuthorization": "检查授权...",
     "exchangeSuccess": "兑换成功",
-    "userCancelTransaction": "用户取消交易",
+    "userCancelTransaction": "您已取消支付",
     "exchangeFailed": "兑换上链失败",
     "dataFormatError": "数据格式错误",
     "getConfigInfoFailed": "获取配置信息失败",

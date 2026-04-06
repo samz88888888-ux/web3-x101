@@ -147,7 +147,7 @@
     "prepareExchange": "Đang chuẩn bị...",
     "checkAuthorization": "Đang kiểm tra ủy quyền...",
     "exchangeSuccess": "Đổi thành công",
-    "userCancelTransaction": "Đã hủy",
+    "userCancelTransaction": "Ban da huy thanh toan",
     "exchangeFailed": "Đổi thất bại",
     "dataFormatError": "Lỗi định dạng dữ liệu",
     "getConfigInfoFailed": "Tải cấu hình thất bại",

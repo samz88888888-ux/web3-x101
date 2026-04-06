@@ -147,7 +147,7 @@
     "prepareExchange": "준비중...",
     "checkAuthorization": "승인 확인중...",
     "exchangeSuccess": "교환 성공",
-    "userCancelTransaction": "사용자 취소",
+    "userCancelTransaction": "결제가 취소되었습니다",
     "exchangeFailed": "교환 실패",
     "dataFormatError": "데이터 형식 오류",
     "getConfigInfoFailed": "설정 로드 실패",
