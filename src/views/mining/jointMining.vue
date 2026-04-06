@@ -63,7 +63,7 @@ const getCoinIcon = (coin) => {
 // 获取组合的标签列表
 const getPackageTags = (pkg) => {
   if (pkg.tag_list && pkg.tag_list.length > 0) {
-    return pkg.tag_list
+    return pkg.tag_list.filter((tag) => tag?.state === 1)
   }
   return []
 }
@@ -220,7 +220,7 @@ const onRefresh = () => {
         <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
         <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
           t('jointMinting.jointMining')
-        }}</span>
+          }}</span>
       </div>
 
       <!-- 统计数据 -->
@@ -257,28 +257,17 @@ const onRefresh = () => {
           <van-image width="13" height="16" :src="hotIcon" fit="contain"></van-image>
           <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
             t('jointMinting.hotPackages')
-          }}</span>
+            }}</span>
         </div>
 
-        <div
-          v-for="pkg in hotPackages"
-          :key="pkg.id"
+        <div v-for="pkg in hotPackages" :key="pkg.id"
           class="power-container mt-30 w-100% flex-col pt-40 px-25 pb-40 items-start justify-center">
           <div class="flex items-center justify-between w-100%">
             <!-- 图标Logo -->
             <div class="flex items-center justify-start gap-16">
               <div class="h-60 flex items-center justify-center">
-                <van-image
-                  width="30"
-                  height="30"
-                  :src="getCoinIcon(pkg.coin1)"
-                  fit="contain"></van-image>
-                <van-image
-                  v-if="pkg.coin2"
-                  class="-ml-18"
-                  width="30"
-                  height="30"
-                  :src="getCoinIcon(pkg.coin2)"
+                <van-image width="30" height="30" :src="getCoinIcon(pkg.coin1)" fit="contain"></van-image>
+                <van-image v-if="pkg.coin2" class="-ml-18" width="30" height="30" :src="getCoinIcon(pkg.coin2)"
                   fit="contain"></van-image>
               </div>
               <div class="flex flex-col items-start justify-center">
@@ -293,26 +282,19 @@ const onRefresh = () => {
 
             <!-- 标签 -->
             <div v-if="getPackageTags(pkg).length > 0" class="flex flex-wrap gap-8 justify-end">
-              <div
-                v-for="(tag, index) in getPackageTags(pkg)"
-                :key="index"
+              <div v-for="(tag, index) in getPackageTags(pkg)" :key="tag.id || tag.name || tag.title || index"
                 class="tag flex items-center justify-center px-16 py-8">
-                <span class="fsize-20 font-pingfang font-500 leading-normal">{{ tag }}</span>
+                <span class="fsize-20 font-pingfang font-500 leading-normal">{{ tag.name || tag.title || tag }}</span>
               </div>
             </div>
           </div>
 
           <!-- 列表展示 - 使用接口数据 -->
-          <div
-            v-for="(row, rowIndex) in getPackageData(pkg)"
-            :key="rowIndex"
-            :class="[
-              'flex items-center justify-between gap-21',
-              rowIndex === 0 ? 'mt-30' : 'mt-21'
-            ]">
-            <div
-              v-for="(item, itemIndex) in row"
-              :key="itemIndex"
+          <div v-for="(row, rowIndex) in getPackageData(pkg)" :key="rowIndex" :class="[
+            'flex items-center justify-between gap-21',
+            rowIndex === 0 ? 'mt-30' : 'mt-21'
+          ]">
+            <div v-for="(item, itemIndex) in row" :key="itemIndex"
               class="out-coin flex flex-1 py-22 px-20 gap-12 rounded-20 items-center justify-start">
               <van-image width="16" height="16" :src="checkedIcon" fit="contain"></van-image>
               <div class="flex flex-col items-start justify-center">
@@ -327,18 +309,13 @@ const onRefresh = () => {
           </div>
 
           <!-- 描述 -->
-          <span
-            v-if="pkg.desc"
-            class="block mt-22 ml-5 fsize-22 font-pingfang font-400 text-[#fff] lh-32 opacity-60">
+          <span v-if="pkg.desc" class="block mt-22 ml-5 fsize-22 font-pingfang font-400 text-[#fff] lh-32 opacity-60">
             {{ pkg.desc }}
           </span>
 
           <!-- 投资按钮 -->
           <div class="flex w-100% h-80 mt-30 items-center justify-center">
-            <van-button
-              round
-              :color="pkg.state === 1 ? '#00FF6E' : '#666'"
-              :disabled="pkg.state !== 1"
+            <van-button round :color="pkg.state === 1 ? '#00FF6E' : '#666'" :disabled="pkg.state !== 1"
               class="w-100% close-btn-text h-100% fsize-30 font-roboto font-600 leading-none"
               @click="handleInvest(pkg)">
               {{
@@ -357,28 +334,17 @@ const onRefresh = () => {
           <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
           <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
             t('jointMinting.moreSelection')
-          }}</span>
+            }}</span>
         </div>
 
-        <div
-          v-for="pkg in morePackages"
-          :key="pkg.id"
+        <div v-for="pkg in morePackages" :key="pkg.id"
           class="power-container mt-20 w-100% flex-col pt-40 px-25 pb-40 items-start justify-center">
           <div class="flex items-center justify-between w-100%">
             <!-- 图标Logo -->
             <div class="flex items-center justify-start gap-16">
               <div class="h-60 flex items-center justify-center">
-                <van-image
-                  width="30"
-                  height="30"
-                  :src="getCoinIcon(pkg.coin1)"
-                  fit="contain"></van-image>
-                <van-image
-                  v-if="pkg.coin2"
-                  class="-ml-18"
-                  width="30"
-                  height="30"
-                  :src="getCoinIcon(pkg.coin2)"
+                <van-image width="30" height="30" :src="getCoinIcon(pkg.coin1)" fit="contain"></van-image>
+                <van-image v-if="pkg.coin2" class="-ml-18" width="30" height="30" :src="getCoinIcon(pkg.coin2)"
                   fit="contain"></van-image>
               </div>
               <div class="flex flex-col items-start justify-center">
@@ -393,26 +359,19 @@ const onRefresh = () => {
 
             <!-- 标签 -->
             <div v-if="getPackageTags(pkg).length > 0" class="flex flex-wrap gap-8 justify-end">
-              <div
-                v-for="(tag, index) in getPackageTags(pkg)"
-                :key="index"
+              <div v-for="(tag, index) in getPackageTags(pkg)" :key="tag.id || tag.name || tag.title || index"
                 class="tag flex items-center justify-center px-16 py-8">
-                <span class="fsize-20 font-pingfang font-500 leading-normal">{{ tag }}</span>
+                <span class="fsize-20 font-pingfang font-500 leading-normal">{{ tag.name || tag.title || tag }}</span>
               </div>
             </div>
           </div>
 
           <!-- 列表展示 - 使用接口数据 -->
-          <div
-            v-for="(row, rowIndex) in getPackageData(pkg)"
-            :key="rowIndex"
-            :class="[
-              'flex items-center justify-between gap-21',
-              rowIndex === 0 ? 'mt-30' : 'mt-21'
-            ]">
-            <div
-              v-for="(item, itemIndex) in row"
-              :key="itemIndex"
+          <div v-for="(row, rowIndex) in getPackageData(pkg)" :key="rowIndex" :class="[
+            'flex items-center justify-between gap-21',
+            rowIndex === 0 ? 'mt-30' : 'mt-21'
+          ]">
+            <div v-for="(item, itemIndex) in row" :key="itemIndex"
               class="out-coin flex flex-1 py-22 px-20 gap-12 rounded-20 items-center justify-start min-h-100">
               <van-image width="16" height="16" :src="checkedIcon" fit="contain"></van-image>
               <div class="flex flex-col items-start justify-center">
@@ -427,18 +386,13 @@ const onRefresh = () => {
           </div>
 
           <!-- 描述 -->
-          <span
-            v-if="pkg.desc"
-            class="block mt-22 ml-5 fsize-22 font-pingfang font-400 text-[#fff] lh-32 opacity-60">
+          <span v-if="pkg.desc" class="block mt-22 ml-5 fsize-22 font-pingfang font-400 text-[#fff] lh-32 opacity-60">
             {{ pkg.desc }}
           </span>
 
           <!-- 投资按钮 -->
           <div class="flex w-100% h-80 mt-30 items-center justify-center">
-            <van-button
-              round
-              :color="pkg.state === 1 ? '#00FF6E' : '#666'"
-              :disabled="pkg.state !== 1"
+            <van-button round :color="pkg.state === 1 ? '#00FF6E' : '#666'" :disabled="pkg.state !== 1"
               class="w-100% close-btn-text h-100% fsize-30 font-roboto font-600 leading-none"
               @click="handleInvest(pkg)">
               {{
@@ -458,28 +412,24 @@ const onRefresh = () => {
 
       <!-- 挖矿订单 -->
       <div class="flex mt-30 flex-col items-start justify-start">
-        <div
-          class="power-container flex flex-col items-center justify-start w-100% pt-37 pb-55 px-30">
+        <div class="power-container flex flex-col items-center justify-start w-100% pt-37 pb-55 px-30">
           <div class="flex items-center justify-between w-100% mb-24">
             <div class="flex gap-12 items-center justify-start">
               <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
               <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
                 t('jointMinting.jointMiningOrder')
-              }}</span>
+                }}</span>
             </div>
             <span class="fsize-22 font-miSans font-400 text-[#fff] leading-none opacity-60">{{
               t('jointMinting.jointMiningOrderTotal', { count: total })
-            }}</span>
+              }}</span>
           </div>
           <div class="log-line"></div>
 
           <!-- 使用 Vant List 组件实现上拉加载和下拉刷新 -->
           <van-pull-refresh v-model="refreshing" @refresh="onRefresh" class="w-100%">
-            <van-list
-              v-model:loading="loading"
-              :finished="finished"
-              :finished-text="jointMiningOrderList.length > 0 ? t('common.noMore') : ''"
-              @load="onLoad"
+            <van-list v-model:loading="loading" :finished="finished"
+              :finished-text="jointMiningOrderList.length > 0 ? t('common.noMore') : ''" @load="onLoad"
               class="log-list">
               <!-- 空状态 -->
               <div v-if="jointMiningOrderList.length === 0 && !loading" class="empty-state">
@@ -487,9 +437,7 @@ const onRefresh = () => {
               </div>
 
               <!-- 列表项 -->
-              <div
-                v-for="(item, index) in jointMiningOrderList"
-                :key="item.id || index"
+              <div v-for="(item, index) in jointMiningOrderList" :key="item.id || index"
                 class="flex flex-col items-start justify-center gap-25 w-100%">
                 <div class="log-line"></div>
                 <div class="flex flex-col w-100% gap-16 pb-20 items-start justify-center">
@@ -497,7 +445,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.packageName')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ item.union?.name || '-' }}
                     </span>
@@ -506,28 +454,19 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.payToken')
-                    }}</span>
+                      }}</span>
                     <div class="flex items-center gap-8">
-                      <van-image
-                        v-if="item.union?.currency1?.img"
-                        width="20"
-                        height="20"
-                        :src="item.union.currency1.img"
-                        fit="contain"></van-image>
+                      <van-image v-if="item.union?.currency1?.img" width="20" height="20"
+                        :src="item.union.currency1.img" fit="contain"></van-image>
                       <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                         {{ formatNumber(item.pay_coin1 || 0, 3) }}
                         {{ item.union?.currency1?.name || '' }}
                       </span>
-                      <span
-                        class="fsize-20 font-pingfang font-400 text-[#fff] leading-normal opacity-60">
+                      <span class="fsize-20 font-pingfang font-400 text-[#fff] leading-normal opacity-60">
                         +
                       </span>
-                      <van-image
-                        v-if="item.union?.currency2?.img"
-                        width="20"
-                        height="20"
-                        :src="item.union.currency2.img"
-                        fit="contain"></van-image>
+                      <van-image v-if="item.union?.currency2?.img" width="20" height="20"
+                        :src="item.union.currency2.img" fit="contain"></van-image>
                       <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                         {{ formatNumber(item.pay_coin2 || 0, 3) }}
                         {{ item.union?.currency2?.name || '' }}
@@ -538,7 +477,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.investmentQuantity')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ formatNumber(item.base_amount || 0, 3) }} U
                     </span>
@@ -547,7 +486,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.totalPower')
-                    }}</span>
+                      }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#16FFC2] leading-normal">
                       +{{ formatNumber(item.total_power || 0, 3) }}
                     </span>
@@ -556,9 +495,8 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.date')
-                    }}</span>
-                    <span
-                      class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
+                      }}</span>
+                    <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.created_at }}
                     </span>
                   </div>
@@ -571,17 +509,11 @@ const onRefresh = () => {
     </div>
 
     <!-- 输入数量弹窗 -->
-    <JointMiningInputPopup
-      ref="inputPopupRef"
-      v-model:show="showInputPopup"
-      :package-info="selectedPackage"
+    <JointMiningInputPopup ref="inputPopupRef" v-model:show="showInputPopup" :package-info="selectedPackage"
       @confirm="handleInputConfirm" />
 
     <!-- 支付弹窗 -->
-    <JointMiningPaymentPopup
-      v-model:show="showPaymentPopup"
-      :order-info="orderInfo"
-      @confirm="handlePaymentSuccess" />
+    <JointMiningPaymentPopup v-model:show="showPaymentPopup" :order-info="orderInfo" @confirm="handlePaymentSuccess" />
   </div>
 </template>
 <style lang="scss" scoped>
@@ -613,11 +545,9 @@ const onRefresh = () => {
   --Linear: linear-gradient(334deg, #3fff6c 9.54%, #fff 97.8%);
   --Style: linear-gradient(180deg, #00ff6e 0%, #009543 100%);
   --bgColor: linear-gradient(180deg, #352700 0%, #1d170b 12.2%, #030202 81.32%);
-  --Radial: radial-gradient(
-    106.52% 106.52% at 50% 50%,
-    rgba(0, 32, 19, 0.95) 42.79%,
-    rgba(0, 255, 128, 0.7) 100%
-  );
+  --Radial: radial-gradient(106.52% 106.52% at 50% 50%,
+      rgba(0, 32, 19, 0.95) 42.79%,
+      rgba(0, 255, 128, 0.7) 100%);
 
   .body {
     width: 100%;
@@ -681,6 +611,7 @@ const onRefresh = () => {
   background: var(--Style, linear-gradient(180deg, #00ff6e 0%, #009543 100%));
   box-shadow: 0 0 8px 0 rgba(0, 255, 110, 0.25) inset;
 }
+
 .tag {
   width: 94px;
   height: 47px;
@@ -739,6 +670,7 @@ const onRefresh = () => {
     .van-loading__spinner {
       color: #00ff6e;
     }
+
     .van-loading__text {
       color: rgba(255, 255, 255, 0.6);
       font-size: 24px;
@@ -755,7 +687,9 @@ const onRefresh = () => {
     color: #00ff6e;
   }
 }
+
 .close-btn-text {
-  color: #000 !important; /* 按钮文字颜色改为白色 */
+  color: #000 !important;
+  /* 按钮文字颜色改为白色 */
 }
 </style>

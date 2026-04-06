@@ -105,6 +105,8 @@ const emit = defineEmits(['update:show', 'confirm'])
 const chainBalances = ref({})
 const isLoadingBalance = ref(false)
 const defaultCoinIcon = usdtIcon
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const NATIVE_PAYMENT_NAMES = ['PYT', 'PYTHIA']
 
 // 支付确认中状态
 const isConfirming = ref(false)
@@ -117,6 +119,22 @@ const contractAddress = computed(() => props.orderInfo?.recharge_contract_addres
 
 // 签名数据
 const signedData = computed(() => props.orderInfo?.data || '')
+
+const isNativeCoin = (coin) => {
+  if (!coin) return false
+
+  const normalizedName = (coin.name || '').toUpperCase()
+  const normalizedAddress = (coin.address || '').toLowerCase()
+
+  return coin.is_native === true ||
+    coin.is_native === 1 ||
+    normalizedAddress === ZERO_ADDRESS.toLowerCase() ||
+    NATIVE_PAYMENT_NAMES.includes(normalizedName)
+}
+
+const isUserRejectedError = (error) => {
+  return error?.code === 'ACTION_REJECTED' || error?.code === 4001 || error?.info?.error?.code === 4001
+}
 
 // 关闭弹窗
 const closePopup = () => {
@@ -139,7 +157,9 @@ const getChainBalances = async () => {
   try {
     const balancePromises = needPayList.value.map(async (coin) => {
       try {
-        const balance = await web3.getTokenBalance(coin.address)
+        const balance = isNativeCoin(coin)
+          ? await web3.getNativeBalance()
+          : await web3.getTokenBalance(coin.address)
         const formattedBalance = ethers.formatUnits(balance, coin.decimals)
         return { name: coin.name, balance: formattedBalance }
       } catch (error) {
@@ -171,6 +191,15 @@ const handleConfirm = async () => {
     return
   }
 
+  const insufficientCoin = needPayList.value.find((coin) => {
+    return parseFloat(chainBalances.value[coin.name] || 0) < parseFloat(coin.amount || 0)
+  })
+
+  if (insufficientCoin) {
+    showToast(`${insufficientCoin.name}${t('exchange.balanceNotEnough')}`)
+    return
+  }
+
   try {
     isConfirming.value = true
     
@@ -189,13 +218,19 @@ const handleConfirm = async () => {
             address: needPayList.value[1].address,
             amount: needPayList.value[1].amount,
             decimals: needPayList.value[1].decimals,
-            name: needPayList.value[1].name
+            name: needPayList.value[1].name,
+            is_native: isNativeCoin(needPayList.value[1])
           }
-        : null
+        : null,
+      value: props.orderInfo?.value
     }
 
-    // 调用双币支付
-    const tx = await web3.payWithDualToken(paymentData)
+    if (paymentData.token1) {
+      paymentData.token1.is_native = isNativeCoin(needPayList.value[0])
+    }
+
+    // 联合铸币兼容 PYTHIA(GAS) + ERC20，同时不影响其他双 ERC20 流程
+    const tx = await web3.payWithLpDualAsset(paymentData)
 
     // 关闭弹窗
     closePopup()
@@ -204,7 +239,7 @@ const handleConfirm = async () => {
     emit('confirm', { tx })
   } catch (error) {
     // 用户拒绝交易的错误已在 useWeb3 中处理,这里不再重复提示
-    if (error.code !== 'ACTION_REJECTED' && error.code !== 4001) {
+    if (!isUserRejectedError(error)) {
       showToast(error.message || t('miningPopup.paymentFailed'))
     }
   } finally {
