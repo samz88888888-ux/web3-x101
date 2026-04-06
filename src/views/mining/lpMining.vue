@@ -18,7 +18,9 @@ import LiquidityPopup from './components/LiquidityPopup.vue'
 const { t } = useI18n()
 
 // 路由合约地址
-const ROUTER_ADDRESS = '0x1F7CdA03D18834C8328cA259AbE57Bf33c46647c'
+const ROUTER_ADDRESS = '0x3E4B742Df4A654F8aaF98B0BBcBAbBf507BF8b53'
+const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
+const WPYTHIA_ADDRESS = '0x504453e7DcF9C6f4c776679498e2b32efc0a9f6b'
 
 // LP挖矿信息
 const lpMiningInfo = ref({})
@@ -36,7 +38,6 @@ const chainBalances = ref({})
 const isLoadingBalance = ref(false)
 
 // 防止循环更新 - 记录最后一次用户输入的币种
-let lastUserInputCoin = null
 // 防抖定时器
 let debounceTimer = null
 
@@ -101,6 +102,18 @@ const coinList = computed(() => {
   return list
 })
 
+const pythiaCoin = computed(() => {
+  return coinList.value.find((coin) => coin.name === 'PYTHIA') || coinList.value[0] || null
+})
+
+const sotaCoin = computed(() => {
+  return coinList.value.find((coin) => coin.name === 'SOTA') || coinList.value[1] || null
+})
+
+const orderedCoinList = computed(() => {
+  return [pythiaCoin.value, sotaCoin.value].filter(Boolean)
+})
+
 // 按钮是否可用
 const isButtonDisabled = computed(() => {
   return config.value?.open_enable !== '1'
@@ -127,7 +140,7 @@ const params = ref({
 })
 // 获取链上余额
 const getChainBalance = async () => {
-  const coins = coinList.value
+  const coins = orderedCoinList.value
 
   if (!coins || coins.length === 0) {
     return
@@ -138,14 +151,17 @@ const getChainBalance = async () => {
   try {
     // 并行获取所有币种的余额
     const balancePromises = coins.map(async (coin) => {
-      if (!coin.contract_address) {
+      if (!coin.contract_address && coin.contract_address !== ZERO_ADDRESS) {
         console.warn(`币种 ${coin.name} 没有合约地址`)
         return { name: coin.name, balance: '0' }
       }
 
       try {
         console.log(`获取 ${coin.name} 余额,合约地址:`, coin.contract_address)
-        const balance = await web3.getTokenBalance(coin.contract_address)
+
+        const balance = coin.contract_address === ZERO_ADDRESS
+          ? await web3.getNativeBalance()
+          : await web3.getTokenBalance(coin.contract_address)
         const formattedBalance = ethers.formatUnits(balance, coin.decimals)
         console.log(`${coin.name} 余额:`, formattedBalance)
         return { name: coin.name, balance: formattedBalance }
@@ -173,7 +189,7 @@ const getChainBalance = async () => {
 
 // 监听币种列表变化,自动获取余额
 watch(
-  coinList,
+  orderedCoinList,
   (newList) => {
     if (newList && newList.length > 0) {
       getChainBalance()
@@ -321,8 +337,10 @@ const getCoinBalance = (coinName) => {
 // 最大化按钮
 const handleMax = (coinName) => {
   const balance = getCoinBalance(coinName)
+  if (coinName !== pythiaCoin.value?.name) return
+
   // 截取3位小数
-  inputAmounts.value[coinName] = parseFloat(balance).toFixed(3)
+  inputAmounts.value[coinName] = parseFloat(balance || 0).toFixed(3)
 }
 
 // 获取路由兑换价格
@@ -332,7 +350,9 @@ const getRouterAmount = async (fromCoin, toCoin, amount) => {
   }
 
   try {
-    const path = [fromCoin.contract_address, toCoin.contract_address]
+    const fromAddress = fromCoin.contract_address === ZERO_ADDRESS ? WPYTHIA_ADDRESS : fromCoin.contract_address
+    const toAddress = toCoin.contract_address === ZERO_ADDRESS ? WPYTHIA_ADDRESS : toCoin.contract_address
+    const path = [fromAddress, toAddress]
     const amountOut = await web3.getAmountsOut(
       ROUTER_ADDRESS,
       amount,
@@ -347,84 +367,38 @@ const getRouterAmount = async (fromCoin, toCoin, amount) => {
   }
 }
 
-// 处理焦点事件 - 明确标记用户正在输入的币种
-const handleFocus = (coinName) => {
-  console.log(`用户聚焦到: ${coinName}`)
-  lastUserInputCoin = coinName
-}
-
-// 处理输入变化 - 统一入口
-const handleInputChange = async (coinName, newAmount) => {
+// 处理 PYTHIA 输入变化
+const handlePythiaInputChange = async (newAmount) => {
   // 清除之前的防抖定时器
   if (debounceTimer) {
     clearTimeout(debounceTimer)
   }
 
-  // 标记这是用户输入的币种
-  lastUserInputCoin = coinName
-
-  // 如果输入为空,清空另一个输入框
-  if (!newAmount || coinList.value.length < 2) {
-    const otherCoin = coinList.value.find((c) => c.name !== coinName)
-    if (otherCoin) {
-      inputAmounts.value[otherCoin.name] = ''
+  if (!newAmount || !pythiaCoin.value || !sotaCoin.value) {
+    if (sotaCoin.value) {
+      inputAmounts.value[sotaCoin.value.name] = ''
     }
     return
   }
 
   // 防抖处理 - 避免频繁计算
   debounceTimer = setTimeout(async () => {
-    const currentCoin = coinList.value.find((c) => c.name === coinName)
-    const otherCoin = coinList.value.find((c) => c.name !== coinName)
-
-    if (!currentCoin || !otherCoin) return
-
-    console.log(`输入 ${coinName}: ${newAmount}, 自动计算 ${otherCoin.name}`)
+    if (!pythiaCoin.value || !sotaCoin.value) return
 
     try {
-      const amount = await getRouterAmount(currentCoin, otherCoin, newAmount)
-
-      // 只有当前币种仍然是最后输入的币种时,才更新另一个币种
-      // 这样可以避免循环更新
-      if (lastUserInputCoin === coinName) {
-        inputAmounts.value[otherCoin.name] = formatNumber(amount, 3)
-        console.log(`自动计算结果: ${otherCoin.name} = ${amount}`)
-      }
+      const amount = await getRouterAmount(pythiaCoin.value, sotaCoin.value, newAmount)
+      inputAmounts.value[sotaCoin.value.name] = formatNumber(amount, 3)
+      console.log(`自动计算结果: ${sotaCoin.value.name} = ${amount}`)
     } catch (error) {
       console.error('自动计算失败:', error)
     }
   }, 300) // 300ms防抖
 }
 
-// 监听第一个币种输入
 watch(
-  () => inputAmounts.value[coinList.value[0]?.name],
+  () => inputAmounts.value[pythiaCoin.value?.name],
   (newAmount) => {
-    const coinName = coinList.value[0]?.name
-    if (!coinName) return
-
-    // 如果这个币种不是最后一次用户输入的,说明是程序自动更新的,跳过
-    if (lastUserInputCoin && lastUserInputCoin !== coinName) {
-      return
-    }
-
-    handleInputChange(coinName, newAmount)
-  }
-)
-
-// 监听第二个币种输入
-watch(
-  () => inputAmounts.value[coinList.value[1]?.name],
-  (newAmount) => {
-    const coinName = coinList.value[1]?.name
-    if (!coinName) return
-
-    // 如果这个币种不是最后一次用户输入的,说明是程序自动更新的,跳过
-    if (lastUserInputCoin && lastUserInputCoin !== coinName) {
-      return
-    }
-
-    handleInputChange(coinName, newAmount)
+    handlePythiaInputChange(newAmount)
   }
 )
 
@@ -443,8 +417,8 @@ const openLiquidityPopup = () => {
   }
 
   // 验证输入
-  const amount1 = parseFloat(inputAmounts.value[coinList.value[0]?.name])
-  const amount2 = parseFloat(inputAmounts.value[coinList.value[1]?.name])
+  const amount1 = parseFloat(inputAmounts.value[pythiaCoin.value?.name])
+  const amount2 = parseFloat(inputAmounts.value[sotaCoin.value?.name])
 
   if (!amount1 || !amount2) {
     showToast('请输入有效的数量')
@@ -470,10 +444,10 @@ const handleAddLiquidity = async (data) => {
       </div>
       <div class="power-container mt-20 w-100% flex-col pt-40 px-25 pb-50 items-start justify-center">
         <div class="h-81 w-100% flex items-center justify-center gap-26">
-          <van-image v-if="coinList[0]" width="40" height="40" :src="getCoinIcon(coinList[0])"
+          <van-image v-if="orderedCoinList[0]" width="40" height="40" :src="getCoinIcon(orderedCoinList[0])"
             fit="contain"></van-image>
           <van-image width="9" height="18" :src="addIcon" fit="contain"></van-image>
-          <van-image v-if="coinList[1]" width="40" height="40" :src="getCoinIcon(coinList[1])"
+          <van-image v-if="orderedCoinList[1]" width="40" height="40" :src="getCoinIcon(orderedCoinList[1])"
             fit="contain"></van-image>
         </div>
         <span class="block mt-23 fsize-30 text-center font-roboto font-700 text-[#fff] leading-normal">PYTHIA-SOTA {{
@@ -529,7 +503,8 @@ const handleAddLiquidity = async (data) => {
           </div>
           <div class="flex flex-col items-start justify-center w-100%">
             <!-- 循环渲染币种输入框 -->
-            <div v-for="(coin, index) in coinList" :key="coin.id" :class="['w-100%', index > 0 ? 'mt-30' : 'mt-30']">
+            <div v-for="(coin, index) in orderedCoinList" :key="coin.id"
+              :class="['w-100%', index > 0 ? 'mt-30' : 'mt-30']">
               <div class="flex items-center justify-between w-100%">
                 <div class="flex items-center gap-10">
                   <van-image width="24" height="24" :src="getCoinIcon(coin)" fit="contain"></van-image>
@@ -545,9 +520,10 @@ const handleAddLiquidity = async (data) => {
               </div>
               <div class="box-input mt-24 w-100% h-92 flex px-30 items-center justify-between rounded-20">
                 <input v-model="inputAmounts[coin.name]" type="number" placeholder="输入数量"
-                  @focus="handleFocus(coin.name)"
+                  :readonly="coin.name === sotaCoin?.name"
                   class="input-field flex-1 bg-transparent border-none outline-none fsize-28 font-roboto font-500 text-[#fff]" />
                 <span class="fsize-28 font-roboto font-500 text-[#00FF6E] cursor-pointer"
+                  :class="{ 'opacity-40 pointer-events-none': coin.name !== pythiaCoin?.name }"
                   @click="handleMax(coin.name)">Max</span>
               </div>
             </div>
@@ -675,7 +651,7 @@ const handleAddLiquidity = async (data) => {
     </div>
 
     <!-- 流动性添加弹窗 -->
-    <LiquidityPopup v-model:show="showLiquidityPopup" :coin-list="coinList" :input-amounts="inputAmounts"
+    <LiquidityPopup v-model:show="showLiquidityPopup" :coin-list="orderedCoinList" :input-amounts="inputAmounts"
       :chain-balances="chainBalances" @confirm="handleAddLiquidity" />
   </div>
 </template>
