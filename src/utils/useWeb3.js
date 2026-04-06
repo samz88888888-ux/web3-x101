@@ -900,16 +900,18 @@ const isNativePaymentToken = (token) => {
   const normalizedName = (token.name || token.symbol || '').toUpperCase()
   const normalizedAddress = (token.address || token.contract_address || '').toLowerCase()
 
-  return token.is_native === true ||
+  return (
+    token.is_native === true ||
     token.is_native === 1 ||
     normalizedAddress === ZERO_ADDRESS.toLowerCase() ||
     NATIVE_PAYMENT_NAMES.includes(normalizedName)
+  )
 }
 
 const isUserRejectedError = (error) => {
-  return error?.code === 'ACTION_REJECTED' ||
-    error?.code === 4001 ||
-    error?.info?.error?.code === 4001
+  return (
+    error?.code === 'ACTION_REJECTED' || error?.code === 4001 || error?.info?.error?.code === 4001
+  )
 }
 
 // 原生币支付（服务端下发 data，交易通过 value 支付主币）
