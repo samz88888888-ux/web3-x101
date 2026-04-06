@@ -97,7 +97,14 @@
     "oldPowerTab": "旧算力",
     "powerPurchaseRecordTotal": "共 {count} 条",
     "confirming": "确认中",
-    "expectedPayment": "预计支付"
+    "expectedPayment": "预计支付",
+    "claimGas": "领取GAS",
+    "claimGasLoading": "领取中...",
+    "claimGasConfirming": "确认领取中...",
+    "claimGasPending": "链上领取确认中...",
+    "claimGasSuccess": "领取GAS成功",
+    "claimGasFailed": "领取GAS失败",
+    "claimGasOrderMissing": "订单ID不存在"
   },
   "user": {
     "inviteLink": "邀请链接",

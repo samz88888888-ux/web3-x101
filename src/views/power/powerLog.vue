@@ -1,11 +1,10 @@
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import api from '@/apis'
 import { showToast } from 'vant'
 import { formatNumber } from '@/utils/format'
-import dotIcon from '@/assets/imgs/power/dot.svg'
-import checkedIcon from '@/assets/imgs/power/checked.svg'
+import web3 from '@/utils/useWeb3'
 
 const { t } = useI18n()
 
@@ -23,6 +22,7 @@ const params = ref({
 
 // 总条数
 const total = ref(0)
+const claimingOrderId = ref('')
 
 // 格式化时间
 const formatTime = (timeStr) => {
@@ -30,6 +30,53 @@ const formatTime = (timeStr) => {
   // 如果是时间戳格式,需要转换
   // 如果已经是格式化的字符串,直接返回
   return timeStr
+}
+
+const getItemOrderId = (item) => item?.order_id || item?.id || ''
+
+const isClaiming = (item) => {
+  return Boolean(claimingOrderId.value) && claimingOrderId.value === getItemOrderId(item)
+}
+
+const handleClaimGas = async (item) => {
+  const orderId = getItemOrderId(item)
+
+  if (!item?.can_claim_gas || claimingOrderId.value) {
+    return
+  }
+
+  if (!orderId) {
+    showToast(t('power.claimGasOrderMissing'))
+    return
+  }
+
+  claimingOrderId.value = orderId
+
+  try {
+    const res = await api.power.powerClaimGas({
+      order_id: orderId
+    })
+
+    if (!res?.data || !res?.recharge_contract_address) {
+      throw new Error(t('power.claimGasFailed'))
+    }
+
+    await web3.sendServerSignedTransaction(res, {
+      loadingMessage: t('power.claimGasConfirming'),
+      pendingMessage: t('power.claimGasPending'),
+      successMessage: t('power.claimGasSuccess'),
+      failMessage: t('power.claimGasFailed')
+    })
+
+    item.can_claim_gas = false
+  } catch (error) {
+    console.error('领取GAS失败:', error)
+    if (!error?.code && !error?.info && !error?.reason) {
+      showToast(error?.message || t('power.claimGasFailed'))
+    }
+  } finally {
+    claimingOrderId.value = ''
+  }
 }
 
 // 加载数据
@@ -88,11 +135,6 @@ const onRefresh = () => {
 
   getPowerLog()
 }
-
-onMounted(() => {
-  // 组件挂载时不做任何操作
-  // van-list 会自动触发 onLoad
-})
 </script>
 <template>
   <div class="container">
@@ -141,6 +183,10 @@ onMounted(() => {
                   <span class="fsize-26 font-miSans font-630 text-[#16FFC2] leading-none">+{{
                     formatNumber(item.total_power || 0, 3) }}</span>
                   <span class="fsize-20 font-miSans font-330 text-[#fff] leading-none opacity-50">累计算力</span>
+                  <van-button v-if="item.can_claim_gas" round size="small" color="#00FF6E" class="claim-btn"
+                    :loading="isClaiming(item)" :disabled="Boolean(claimingOrderId)" @click="handleClaimGas(item)">
+                    {{ isClaiming(item) ? t('power.claimGasLoading') : t('power.claimGas') }}
+                  </van-button>
                 </div>
               </div>
               <div class="line"></div>
@@ -226,6 +272,20 @@ onMounted(() => {
   .pay-badge {
     background: rgba(249, 3, 164, 0.2);
     border: 1px solid rgba(249, 3, 164, 0.4);
+  }
+
+  .claim-btn {
+    margin-top: 12px;
+    padding: 8px 24px;
+    font-size: 22px;
+    font-family: 'PingFang SC', sans-serif;
+    font-weight: 500;
+    height: auto;
+    min-width: 140px;
+
+    :deep(.van-button__content) {
+      color: #fff;
+    }
   }
 
   /* 空状态 */

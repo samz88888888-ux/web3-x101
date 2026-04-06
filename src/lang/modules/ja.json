@@ -96,7 +96,14 @@
     "oldPowerTab": "旧パワー",
     "powerPurchaseRecordTotal": "合計 {count}件",
     "confirming": "確認中",
-    "expectedPayment": "予想支払い"
+    "expectedPayment": "予想支払い",
+    "claimGas": "GAS受取",
+    "claimGasLoading": "受取中...",
+    "claimGasConfirming": "受取確認中...",
+    "claimGasPending": "オンチェーン確認中...",
+    "claimGasSuccess": "GAS受取成功",
+    "claimGasFailed": "GAS受取失敗",
+    "claimGasOrderMissing": "注文IDがありません"
   },
   "user": {
     "inviteLink": "招待リンク",

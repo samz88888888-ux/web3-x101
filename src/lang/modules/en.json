@@ -97,7 +97,14 @@
     "powerPurchaseRecordTotal": "Total {count}",
     "confirming": "Confirming",
     "expectedPayment": "Expected Payment",
-    "chainBalanceText": "DAPP Balance:"
+    "chainBalanceText": "DAPP Balance:",
+    "claimGas": "Claim GAS",
+    "claimGasLoading": "Claiming...",
+    "claimGasConfirming": "Confirming claim...",
+    "claimGasPending": "Waiting for on-chain confirmation...",
+    "claimGasSuccess": "GAS claimed successfully",
+    "claimGasFailed": "Failed to claim GAS",
+    "claimGasOrderMissing": "Order ID is missing"
   },
   "user": {
     "inviteLink": "Invite Link",

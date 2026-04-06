@@ -96,7 +96,14 @@
     "oldPowerTab": "舊算力",
     "powerPurchaseRecordTotal": "共 {count} 條",
     "confirming": "確認中",
-    "expectedPayment": "預計支付"
+    "expectedPayment": "預計支付",
+    "claimGas": "領取GAS",
+    "claimGasLoading": "領取中...",
+    "claimGasConfirming": "確認領取中...",
+    "claimGasPending": "鏈上領取確認中...",
+    "claimGasSuccess": "領取GAS成功",
+    "claimGasFailed": "領取GAS失敗",
+    "claimGasOrderMissing": "訂單ID不存在"
   },
   "user": {
     "inviteLink": "邀請鏈接",

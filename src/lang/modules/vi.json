@@ -96,7 +96,14 @@
     "oldPowerTab": "Power cũ",
     "powerPurchaseRecordTotal": "Tổng {count}",
     "confirming": "Đang xác nhận",
-    "expectedPayment": "Dự kiến thanh toán"
+    "expectedPayment": "Dự kiến thanh toán",
+    "claimGas": "Claim GAS",
+    "claimGasLoading": "Claiming...",
+    "claimGasConfirming": "Confirming claim...",
+    "claimGasPending": "Waiting for on-chain confirmation...",
+    "claimGasSuccess": "GAS claimed successfully",
+    "claimGasFailed": "Failed to claim GAS",
+    "claimGasOrderMissing": "Order ID is missing"
   },
   "user": {
     "inviteLink": "Link mời",

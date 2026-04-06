@@ -914,6 +914,67 @@ const isUserRejectedError = (error) => {
   )
 }
 
+export const sendServerSignedTransaction = async (
+  txData,
+  {
+    loadingMessage = i18n.global.t('power.confirming'),
+    pendingMessage = '链上确认中...',
+    successMessage = '操作成功',
+    failMessage = '操作失败'
+  } = {}
+) => {
+  await ensureReady()
+
+  const contractAddress = txData?.recharge_contract_address || txData?.contractAddress
+  const data = txData?.data
+  const hasValue = txData?.value !== undefined && txData?.value !== null && txData?.value !== ''
+  const txValue = hasValue ? normalizeNativeValue(txData.value, '0') : 0n
+
+  if (!contractAddress || !ethers.isAddress(contractAddress)) {
+    throw new Error('无效的合约地址')
+  }
+
+  if (!data) {
+    throw new Error('交易数据不能为空')
+  }
+
+  try {
+    showLoadingToast({
+      message: loadingMessage,
+      duration: 0
+    })
+
+    const tx = await signer.sendTransaction({
+      to: contractAddress,
+      data,
+      value: txValue,
+      gasLimit: GAS_LIMITS.contractCall
+    })
+
+    if (tx.hash) {
+      showLoadingToast({
+        message: pendingMessage,
+        duration: 0
+      })
+    }
+
+    await tx.wait()
+
+    closeToast()
+    showToast(successMessage)
+
+    return Promise.resolve(tx)
+  } catch (error) {
+    closeToast()
+
+    if (!isUserRejectedError(error)) {
+      showToast(failMessage)
+    }
+
+    return Promise.reject(error)
+  }
+}
+
 // 原生币支付（服务端下发 data，交易通过 value 支付主币）
 export const payWithNativeCoinOnly = async (orderData) => {
   await ensureReady()
@@ -1446,6 +1507,7 @@ export default {
   miningPay,
   transferBNB,
   ensureReady,
+  sendServerSignedTransaction,
   payWithSignData,
   payWithNativeCoinOnly,
   payWithTokenOnly,

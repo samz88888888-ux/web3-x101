@@ -97,7 +97,14 @@
     "powerPurchaseRecordTotal": "Total {count}",
     "confirming": "Mengonfirmasi",
     "expectedPayment": "Perkiraan Pembayaran",
-    "chainBalanceText": "DAPP余额:"
+    "chainBalanceText": "DAPP余额:",
+    "claimGas": "Claim GAS",
+    "claimGasLoading": "Claiming...",
+    "claimGasConfirming": "Confirming claim...",
+    "claimGasPending": "Waiting for on-chain confirmation...",
+    "claimGasSuccess": "GAS claimed successfully",
+    "claimGasFailed": "Failed to claim GAS",
+    "claimGasOrderMissing": "Order ID is missing"
   },
   "user": {
     "inviteLink": "Link Undangan",

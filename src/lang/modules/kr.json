@@ -96,7 +96,14 @@
     "oldPowerTab": "이전 파워",
     "powerPurchaseRecordTotal": "총 {count}개",
     "confirming": "확인 중",
-    "expectedPayment": "예상 결제"
+    "expectedPayment": "예상 결제",
+    "claimGas": "GAS 받기",
+    "claimGasLoading": "처리 중...",
+    "claimGasConfirming": "수령 확인 중...",
+    "claimGasPending": "온체인 확인 중...",
+    "claimGasSuccess": "GAS 수령 성공",
+    "claimGasFailed": "GAS 수령 실패",
+    "claimGasOrderMissing": "주문 ID가 없습니다"
   },
   "user": {
     "inviteLink": "초대 링크",
