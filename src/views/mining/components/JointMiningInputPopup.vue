@@ -1,10 +1,6 @@
 <template>
-  <van-popup
-    :show="show"
-    position="bottom"
-    :style="{ background: 'transparent', padding: '0 26px 72px' }"
-    :overlay-style="{ backdropFilter: 'blur(4px)' }"
-    @click-overlay="closePopup">
+  <van-popup :show="show" position="bottom" :style="{ background: 'transparent', padding: '0 26px 72px' }"
+    :overlay-style="{ backdropFilter: 'blur(4px)' }" @click-overlay="closePopup">
     <div class="liquidity-popup">
       <div class="flex items-center justify-between w-100%">
         <!-- 标题 -->
@@ -19,12 +15,8 @@
       <!-- 输入数量 -->
       <div class="section-title">{{ t('miningPopup.investQuantity') }}</div>
       <div class="input-box">
-        <input
-          v-model="inputAmount"
-          type="number"
-          :placeholder="t('miningPopup.pleaseEnterUSDTQuantity')"
-          class="amount-input"
-          @input="handleInput" />
+        <input v-model="inputAmount" type="number" :placeholder="t('miningPopup.pleaseEnterUSDTQuantity')"
+          class="amount-input" />
         <span class="unit">USDT</span>
       </div>
       <div class="min-tip">
@@ -45,9 +37,7 @@
       </div>
 
       <!-- 确定按钮 -->
-      <div
-        @click="handleConfirm"
-        :class="['confirm-btn', { disabled: !canSubmit, loading: loading }]">
+      <div @click="handleConfirm" :class="['confirm-btn', { disabled: !canSubmit, loading: loading }]">
         <van-loading v-if="loading" color="#fff" size="24" />
         <span v-else>{{ t('miningPopup.confirmInvest') }}</span>
       </div>
@@ -165,7 +155,7 @@ defineExpose({
     z-index: 0;
   }
 
-  > * {
+  >* {
     position: relative;
     z-index: 1;
   }
@@ -182,6 +172,7 @@ defineExpose({
   cursor: pointer;
   z-index: 2;
   transition: transform 0.2s ease;
+
   &:active {
     transform: scale(0.9);
   }
@@ -249,6 +240,7 @@ defineExpose({
       -webkit-appearance: none;
       margin: 0;
     }
+
     -moz-appearance: textfield;
   }
 
