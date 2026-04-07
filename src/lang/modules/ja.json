@@ -402,7 +402,7 @@
   },
   "walletEnum": {
     "all": "全て",
-    "dataVerification": "データ検証",
+    "dataVerification": "チェーン調整",
     "withdrawal": "出金",
     "withdrawalReturn": "返却",
     "nodePurchase": "ノード購入",

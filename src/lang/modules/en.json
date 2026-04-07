@@ -423,7 +423,7 @@
   },
   "walletEnum": {
     "all": "All",
-    "dataVerification": "Data Verify",
+    "dataVerification": "Chain Adjustment",
     "withdrawal": "Withdrawal",
     "withdrawalReturn": "Refund",
     "nodePurchase": "Node Purchase",

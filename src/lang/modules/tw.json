@@ -423,7 +423,7 @@
   },
   "walletEnum": {
     "all": "全部",
-    "dataVerification": "數據校驗",
+    "dataVerification": "鏈上調整",
     "withdrawal": "提現",
     "withdrawalReturn": "提現退回",
     "nodePurchase": "購買節點",

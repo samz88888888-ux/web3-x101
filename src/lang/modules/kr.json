@@ -422,7 +422,7 @@
   },
   "walletEnum": {
     "all": "전체",
-    "dataVerification": "데이터 검증",
+    "dataVerification": "체인 조정",
     "withdrawal": "출금",
     "withdrawalReturn": "반환",
     "nodePurchase": "노드 구매",

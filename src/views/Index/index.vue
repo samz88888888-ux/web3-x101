@@ -200,6 +200,7 @@ const proofList = ref([
 const handleMenuItemClick = (item) => {
   handleMenuClick(item, router)
 }
+const showKline = false
 const klineList = ref([])
 const homeInfo = ref({})
 
@@ -279,7 +280,9 @@ const klineData = computed(() => {
 onMounted(() => {
   getBannerList()
   getNoticeList()
-  getKlineList()
+  if (showKline) {
+    getKlineList()
+  }
   getHomeInfo()
 })
 </script>
@@ -439,7 +442,7 @@ onMounted(() => {
       </div>
 
       <!-- KLINE -->
-      <div class="kline-container mt-40 w-100%">
+      <div v-if="showKline" class="kline-container mt-40 w-100%">
         <div class="kline-inner w-100% h-100% flex flex-col items-start justify-start pt-24 px-35 pb-20">
           <div class="flex items-center justify-center">
             <div class="wh-48 flex items-center justify-center gap-8">

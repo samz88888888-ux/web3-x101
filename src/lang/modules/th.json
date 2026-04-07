@@ -401,7 +401,7 @@
   },
   "walletEnum": {
     "all": "ทั้งหมด",
-    "dataVerification": "ตรวจสอบข้อมูล",
+    "dataVerification": "การปรับปรุงบล็อค",
     "withdrawal": "ถอน",
     "withdrawalReturn": "คืน",
     "nodePurchase": "ซื้อโหนด",

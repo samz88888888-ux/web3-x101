@@ -401,7 +401,7 @@
   },
   "walletEnum": {
     "all": "Tất cả",
-    "dataVerification": "Xác minh dữ liệu",
+    "dataVerification": "Điều chỉnh chuỗi",
     "withdrawal": "Rút tiền",
     "withdrawalReturn": "Trả lại",
     "nodePurchase": "Mua Node",
