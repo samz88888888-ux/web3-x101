@@ -6,6 +6,6 @@ export const network = {
     symbol: 'PYTHIA',
     decimals: 18
   },
-  rpcUrls: ['https://rpc.pychain.biz'],
+  rpcUrls: ['https://rpc.pychain.vip', 'https://rpc.pychain.biz'],
   blockExplorerUrls: ['http://explorer.pychain.co']
 }

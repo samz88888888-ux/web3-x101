@@ -310,9 +310,14 @@ const handlePayment = async (data) => {
         <span class="block pt-52 fsize-32 font-roboto font-700 text-[#fff] leading-none">{{
           t('power.subscribeAmount')
         }}</span>
-        <div class="coin-list h-88 mt-24 flex items-center justify-center px-30">
+        <div class="coin-list subscribe-input-box h-88 mt-24 flex items-center justify-between px-30 gap-20">
           <input v-model="subscribeAmount" type="text" :placeholder="t('power.pleaseEnterSubscribeAmount')"
             @input="handleInput" class="input-field w-100% h-100% bg-transparent border-none outline-none" />
+          <div v-if="expectedUsdtValue > 0" class="usdt-estimate-chip flex-shrink-0 px-16 py-10">
+            <span class="fsize-22 font-roboto font-600 leading-none whitespace-nowrap">
+              ≈{{ formatNumber(expectedUsdtValue, 4) }} U
+            </span>
+          </div>
         </div>
         <div v-if="powerConfig?.asset_packet_config" class="mt-16 flex items-center justify-start gap-8">
           <van-image width="12" height="12" :src="dotIcon" fit="contain"></van-image>
@@ -327,7 +332,7 @@ const handlePayment = async (data) => {
         </div>
         <div class="expected flex items-center justify-start mt-40 px-33 py-22 gap-16">
           <van-image width="20" height="20" :src="checkedIcon" fit="contain"></van-image>
-          <div class="flex flex-col items-start justify-start gap-5 flex-1">
+          <div class="flex flex-col items-start justify-start gap-5">
             <!-- 根据选择的支付方式显示对应币种 -->
             <span class="fsize-30 text-[#fff] font-roboto font-700 lh-40">{{ formatNumber(expectedAdx, 3) }} {{
               currentCoinName
@@ -336,9 +341,6 @@ const handlePayment = async (data) => {
               t('power.expectedPayment') + currentCoinName
             }}</span>
           </div>
-          <span class="fsize-26 text-[rgba(255,255,255,0.72)] font-roboto font-600 leading-none whitespace-nowrap">
-            ≈{{ formatNumber(expectedUsdtValue, 2) }} U
-          </span>
         </div>
         <div class="flex w-100% h-90 mt-38 items-center justify-center">
           <van-button round color="#00FF6E" :disabled="isButtonDisabled"
@@ -567,7 +569,14 @@ const handlePayment = async (data) => {
     background: rgba(255, 154, 252, 0.1);
   }
 
+  .subscribe-input-box {
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
   .input-field {
+    flex: 1;
+    min-width: 0;
     color: #fff;
     font-family: Roboto;
     font-size: 28px;
@@ -583,6 +592,14 @@ const handlePayment = async (data) => {
       font-weight: 500;
       line-height: 50px;
     }
+  }
+
+  .usdt-estimate-chip {
+    border-radius: 999px;
+    background: rgba(63, 255, 108, 0.12);
+    border: 1px solid rgba(63, 255, 108, 0.2);
+    color: rgba(63, 255, 108, 0.96);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   .expected {
