@@ -68,7 +68,7 @@
     "powerPurchaseRecord": "认购记录",
     "subscribeAmount": "认购数量",
     "pleaseEnterSubscribeAmount": "请输入认购数量",
-    "minimumQuantity": "最小数量",
+    "minimumQuantity": "最小投资额",
     "multiple": "倍数",
     "exchangeRate": "汇率",
     "expectedPaymentADX": "预计支付ADX",

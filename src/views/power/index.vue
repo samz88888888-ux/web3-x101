@@ -128,6 +128,15 @@ const expectedAdx = computed(() => {
   return 0
 })
 
+const expectedUsdtValue = computed(() => {
+  const amount = parseFloat(subscribeAmount.value)
+  const price = parseFloat(currentPrice.value || 0)
+
+  if (!amount || amount <= 0 || !price || price <= 0) return 0
+
+  return amount * price
+})
+
 // 检查按钮是否可用
 const isButtonDisabled = computed(() => {
   const config = powerConfig.value?.asset_packet_config
@@ -318,7 +327,7 @@ const handlePayment = async (data) => {
         </div>
         <div class="expected flex items-center justify-start mt-40 px-33 py-22 gap-16">
           <van-image width="20" height="20" :src="checkedIcon" fit="contain"></van-image>
-          <div class="flex flex-col items-start justify-start gap-5">
+          <div class="flex flex-col items-start justify-start gap-5 flex-1">
             <!-- 根据选择的支付方式显示对应币种 -->
             <span class="fsize-30 text-[#fff] font-roboto font-700 lh-40">{{ formatNumber(expectedAdx, 3) }} {{
               currentCoinName
@@ -327,6 +336,9 @@ const handlePayment = async (data) => {
               t('power.expectedPayment') + currentCoinName
             }}</span>
           </div>
+          <span class="fsize-26 text-[rgba(255,255,255,0.72)] font-roboto font-600 leading-none whitespace-nowrap">
+            ≈{{ formatNumber(expectedUsdtValue, 2) }} U
+          </span>
         </div>
         <div class="flex w-100% h-90 mt-38 items-center justify-center">
           <van-button round color="#00FF6E" :disabled="isButtonDisabled"

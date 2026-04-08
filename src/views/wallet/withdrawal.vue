@@ -48,8 +48,8 @@ const showCoinPicker = ref(false)
 // 币种选项
 const coinColumns = [
   // { text: 'X101', value: 1, icon: x101Icon },
-  { text: 'PYTHIA', value: 2, icon: pytIcon },
-  { text: 'SOTA', value: 3, icon: sotaIcon }
+  { text: 'SOTA', value: 3, icon: sotaIcon },
+  { text: 'PYTHIA', value: 2, icon: pytIcon }
 ]
 
 // 当前选中的币种信息
