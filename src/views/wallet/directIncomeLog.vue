@@ -117,8 +117,7 @@ const onRefresh = () => {
 <template>
   <div class="container">
     <div class="body">
-      <div
-        class="power-container mt-37 w-100% flex-col pt-37 px-30 pb-195 items-start justify-center">
+      <div class="power-container mt-37 w-100% flex-col pt-37 px-30 pb-195 items-start justify-center">
         <div class="flex items-center justify-between">
           <span class="block fsize-28 font-miSans font-630 text-[#fff] leading-none">
             {{ t('wallet.total') }}: {{ total }} {{ t('wallet.records') }}
@@ -129,21 +128,15 @@ const onRefresh = () => {
         <div class="log-list flex flex-col items-start justify-center gap-24 pt-28">
           <!-- 使用 Vant List 组件实现上拉加载和下拉刷新 -->
           <van-pull-refresh v-model="refreshing" @refresh="onRefresh" class="w-100%">
-            <van-list
-              v-model:loading="loading"
-              :finished="finished"
-              :finished-text="list.length > 0 ? t('wallet.noMore') : ''"
-              @load="onLoad"
-              class="list-wrapper">
+            <van-list v-model:loading="loading" :finished="finished"
+              :finished-text="list.length > 0 ? t('wallet.noMore') : ''" @load="onLoad" class="list-wrapper">
               <!-- 空状态 -->
               <div v-if="list.length === 0 && !loading" class="empty-state">
                 <van-empty :description="t('wallet.noData')" />
               </div>
 
               <!-- 列表项 -->
-              <div
-                v-for="(item, index) in list"
-                :key="index"
+              <div v-for="(item, index) in list" :key="index"
                 class="w-100% flex flex-col mt-20 items-start justify-center">
                 <div class="flex w-100% items-center justify-between">
                   <div class="flex flex-col gap-16 items-start justify-center">
@@ -162,7 +155,7 @@ const onRefresh = () => {
                     </span>
                   </div>
                   <span class="fsize-26 font-miSans font-630 leading-none text-[#16FFC2]">
-                    +{{ formatNumber(item.amount, 3) }} USDT
+                    +{{ formatNumber(item.amount, 3) }} PYTHIA
                   </span>
                 </div>
                 <div class="line"></div>
@@ -203,11 +196,10 @@ const onRefresh = () => {
   --Linear: linear-gradient(334deg, #3fff6c 9.54%, #fff 97.8%);
   --Style: linear-gradient(180deg, #00ff6e 0%, #009543 100%);
   --bgColor: linear-gradient(180deg, #352700 0%, #1d170b 12.2%, #030202 81.32%);
-  --Radial: radial-gradient(
-    106.52% 106.52% at 50% 50%,
-    rgba(0, 32, 19, 0.95) 42.79%,
-    rgba(0, 255, 128, 0.7) 100%
-  );
+  --Radial: radial-gradient(106.52% 106.52% at 50% 50%,
+      rgba(0, 32, 19, 0.95) 42.79%,
+      rgba(0, 255, 128, 0.7) 100%);
+
   .body {
     width: 100%;
     padding: 10px 30px 300px;

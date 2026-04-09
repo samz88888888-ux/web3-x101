@@ -20,6 +20,14 @@ import pytIcon from '@/assets/imgs/coin/pyt-coin.png'
 const { t } = useI18n()
 const store = useIndexStore()
 
+// 币种选项
+const coinColumns = [
+  { text: 'SOTA', value: 3, icon: sotaIcon },
+  { text: 'PYTHIA', value: 2, icon: pytIcon }
+]
+
+const normalizeCoinValue = (value) => Number(value || coinColumns[0].value)
+
 // 获取用户信息
 const getUserInfo = async () => {
   try {
@@ -29,32 +37,20 @@ const getUserInfo = async () => {
   }
 }
 
-// X101 余额
-const x101Balance = computed(() => {
-  return store.userInfo?.balance_list?.x101_balance || 0
-})
-
 // PYTHIA 余额
 const adxBalance = computed(() => {
   return store.userInfo?.balance_list?.adx_balance || 0
 })
 
-// 币种选择 1-X101, 2-PYTHIA
-const selectedCoin = ref(1)
+// 币种选择 2-PYTHIA, 3-SOTA
+const selectedCoin = ref(coinColumns[0].value)
 
 // 显示币种选择器
 const showCoinPicker = ref(false)
 
-// 币种选项
-const coinColumns = [
-  // { text: 'X101', value: 1, icon: x101Icon },
-  { text: 'SOTA', value: 3, icon: sotaIcon },
-  { text: 'PYTHIA', value: 2, icon: pytIcon }
-]
-
 // 当前选中的币种信息
 const currentCoin = computed(() => {
-  return coinColumns.find(item => item.value === selectedCoin.value) || coinColumns[0]
+  return coinColumns.find(item => item.value === normalizeCoinValue(selectedCoin.value)) || coinColumns[0]
 })
 
 // SOTA 余额
@@ -64,9 +60,9 @@ const sotaBalance = computed(() => {
 
 // 当前余额
 const currentBalance = computed(() => {
-  if (selectedCoin.value === 1) return x101Balance.value
-  if (selectedCoin.value === 2) return adxBalance.value
-  if (selectedCoin.value === 3) return sotaBalance.value
+  const coinValue = normalizeCoinValue(selectedCoin.value)
+  if (coinValue === 2) return adxBalance.value
+  if (coinValue === 3) return sotaBalance.value
   return 0
 })
 
@@ -91,14 +87,13 @@ const params = ref({
 
 // 提现配置数据 - 根据选中的币种动态切换
 const config = computed(() => {
-  if (selectedCoin.value === 1) {
-    return withdrawConfig.value?.x101_withdraw_config || {}
-  } else if (selectedCoin.value === 2) {
+  const coinValue = normalizeCoinValue(selectedCoin.value)
+  if (coinValue === 2) {
     return withdrawConfig.value?.pythia_withdraw_config || {}
-  } else if (selectedCoin.value === 3) {
+  } else if (coinValue === 3) {
     return withdrawConfig.value?.sota_withdraw_config || {}
   } else {
-    return withdrawConfig.value?.adx_withdraw_config || {}
+    return {}
   }
 })
 
@@ -121,7 +116,7 @@ const expectedAmount = computed(() => {
 
 // 选择币种
 const onCoinConfirm = ({ selectedOptions }) => {
-  selectedCoin.value = selectedOptions[0].value
+  selectedCoin.value = normalizeCoinValue(selectedOptions?.[0]?.value)
   showCoinPicker.value = false
   // 切换币种时清空输入金额
   withdrawAmount.value = ''
@@ -287,7 +282,7 @@ const handleWithdraw = async () => {
     // 调用提现接口
     const res = await api.wallet.doWithdraw({
       amount: withdrawAmount.value,
-      coin_id: selectedCoin.value.toString() // 1-x101, 2-ADX
+      coin_id: normalizeCoinValue(selectedCoin.value).toString()
     })
 
     closeToast()
