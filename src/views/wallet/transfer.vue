@@ -50,7 +50,12 @@ onMounted(() => {
 
 const handleAmountInput = (event) => {
   let value = event.target.value
-  value = value.replace(/[^\d]/g, '')
+  value = value.replace(/[^\d.]/g, '')
+
+  const firstDotIndex = value.indexOf('.')
+  if (firstDotIndex !== -1) {
+    value = `${value.slice(0, firstDotIndex + 1)}${value.slice(firstDotIndex + 1).replace(/\./g, '')}`
+  }
 
   if (!value) {
     transferAmount.value = ''
@@ -58,13 +63,20 @@ const handleAmountInput = (event) => {
     return
   }
 
-  value = value.replace(/^0+(?=\d)/, '')
+  if (value.startsWith('.')) {
+    value = `0${value}`
+  }
+
+  const [integerPart = '', decimalPart] = value.split('.')
+  const normalizedIntegerPart = integerPart.replace(/^0+(?=\d)/, '') || '0'
+  value = decimalPart !== undefined ? `${normalizedIntegerPart}.${decimalPart}` : normalizedIntegerPart
+
   transferAmount.value = value
   event.target.value = value
 }
 
 const handleMax = () => {
-  transferAmount.value = Math.floor(Number(x101Balance.value) || 0).toString()
+  transferAmount.value = String(x101Balance.value || '0')
 }
 
 const getTransferType = () => {
@@ -180,12 +192,14 @@ const handleSubmit = async () => {
     return
   }
 
-  if (!transferAmount.value || parseInt(transferAmount.value, 10) <= 0) {
+  const amount = parseFloat(transferAmount.value)
+
+  if (!transferAmount.value || Number.isNaN(amount) || amount <= 0) {
     showToast(t('wallet.pleaseEnterTransferAmount'))
     return
   }
 
-  if (parseInt(transferAmount.value, 10) > parseFloat(x101Balance.value || 0)) {
+  if (amount > parseFloat(x101Balance.value || 0)) {
     showToast(t('wallet.transferBalanceNotEnough'))
     return
   }
@@ -264,7 +278,7 @@ const handleSubmit = async () => {
           <span class="field-label">{{ t('wallet.transferAmount') }}</span>
           <div class="input-shell amount-shell">
             <input v-model="transferAmount" type="text" inputmode="numeric"
-              :placeholder="t('wallet.pleaseEnterPositiveIntegerAmount')" class="field-input" @input="handleAmountInput" />
+              :placeholder="t('wallet.pleaseEnterTransferAmount')" class="field-input" @input="handleAmountInput" />
             <button type="button" class="max-btn close-btn-text" @click="handleMax">MAX</button>
           </div>
         </div>
@@ -317,10 +331,12 @@ const handleSubmit = async () => {
               </div>
 
               <div class="record-item-body">
-                <span class="record-line">{{ t('wallet.counterpartyAddress') }}：{{ formatAddress(item.other_user?.address) }}</span>
+                <span class="record-line">{{ t('wallet.counterpartyAddress') }}：{{
+                  formatAddress(item.other_user?.address) }}</span>
                 <span class="record-line">{{ t('wallet.orderNumber') }}：{{ item.order_no || '--' }}</span>
-                <span class="record-line">{{ t('wallet.fee') }}：{{ formatNumber(item.fee_amount || 0, 3) }} {{ item.currency || 'X101'
-                }}</span>
+                <span class="record-line">{{ t('wallet.fee') }}：{{ formatNumber(item.fee_amount || 0, 3) }} {{
+                  item.currency || 'X101'
+                  }}</span>
               </div>
             </div>
           </van-list>
