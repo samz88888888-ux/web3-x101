@@ -288,6 +288,8 @@
     "getting": "가져오는 중...",
     "goToPayFailed": "결제 실패",
     "goToPayFailedTip": "다시 시도하세요",
+    "totalPayAmount": "총 결제 금액",
+    "createTime": "생성 시간",
     "noOrder": "주문 없음",
     "packageName": "패키지",
     "investmentQuantity": "수량",

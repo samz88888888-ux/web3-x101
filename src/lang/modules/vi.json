@@ -286,6 +286,8 @@
     "pendingOrder": "Đơn hàng đang chờ thanh toán",
     "goToPay": "Đi thanh toán~",
     "getting": "Đang lấy...",
+    "totalPayAmount": "Tổng số thanh toán",
+    "createTime": "Thời gian tạo",
     "goToPayFailed": "Thanh toán thất bại",
     "goToPayFailedTip": "Vui lòng thử lại sau",
     "noOrder": "Không có đơn hàng",

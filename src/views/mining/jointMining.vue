@@ -309,7 +309,7 @@ const onRefresh = () => {
         <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
         <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
           t('jointMinting.jointMining')
-          }}</span>
+        }}</span>
       </div>
 
       <!-- 统计数据 -->
@@ -346,7 +346,7 @@ const onRefresh = () => {
           <van-image width="13" height="16" :src="hotIcon" fit="contain"></van-image>
           <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
             t('jointMinting.hotPackages')
-            }}</span>
+          }}</span>
         </div>
 
         <div v-for="pkg in hotPackages" :key="pkg.id"
@@ -423,7 +423,7 @@ const onRefresh = () => {
           <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
           <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
             t('jointMinting.moreSelection')
-            }}</span>
+          }}</span>
         </div>
 
         <div v-for="pkg in morePackages" :key="pkg.id"
@@ -507,11 +507,11 @@ const onRefresh = () => {
               <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
               <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
                 isPendingOrderTab ? t('jointMinting.pendingOrder') : t('jointMinting.jointMiningOrder')
-                }}</span>
+              }}</span>
             </div>
             <span class="fsize-22 font-miSans font-400 text-[#fff] leading-none opacity-60">{{
               t('jointMinting.jointMiningOrderTotal', { count: total })
-              }}</span>
+            }}</span>
           </div>
           <div class="order-tabs w-100% mb-24">
             <button type="button" class="order-tab" :class="{ active: orderTab === 'mined' }"
@@ -544,7 +544,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.packageName')
-                      }}</span>
+                    }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ item.union?.name || '-' }}
                     </span>
@@ -553,7 +553,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.payToken')
-                      }}</span>
+                    }}</span>
                     <div class="flex items-center gap-8">
                       <van-image v-if="item.union?.currency1?.img" width="20" height="20"
                         :src="item.union.currency1.img" fit="contain"></van-image>
@@ -576,7 +576,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.investmentQuantity')
-                      }}</span>
+                    }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">
                       {{ formatNumber(item.base_amount || 0, 3) }} U
                     </span>
@@ -585,7 +585,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.totalPower')
-                      }}</span>
+                    }}</span>
                     <span class="fsize-24 font-pingfang font-500 text-[#16FFC2] leading-normal">
                       +{{ formatNumber(item.total_power || 0, 3) }}
                     </span>
@@ -594,7 +594,7 @@ const onRefresh = () => {
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
                       t('jointMinting.date')
-                      }}</span>
+                    }}</span>
                     <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.created_at }}
                     </span>
@@ -608,7 +608,9 @@ const onRefresh = () => {
                     </span>
                   </div> -->
                   <div class="flex items-center justify-between w-100%">
-                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">支付总额</span>
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
+                      t('jointMinting.totalPayAmount')
+                    }}</span>
                     <span class="fsize-24 font-roboto font-500 text-[#fff] leading-normal">
                       {{ formatNumber(item.total_amount || 0, 3) }} PYTHIA
                     </span>
@@ -621,7 +623,9 @@ const onRefresh = () => {
                     </span>
                   </div> -->
                   <div class="flex items-center justify-between w-100%">
-                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">创建时间</span>
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
+                      t('jointMinting.createTime')
+                    }}</span>
                     <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.created_at }}
                     </span>

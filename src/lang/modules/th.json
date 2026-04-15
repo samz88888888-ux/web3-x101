@@ -286,6 +286,8 @@
     "pendingOrder": "คำสั่งซื้อรอชำระ",
     "goToPay": "ไปชำระ~",
     "getting": "กำลังดึง...",
+    "totalPayAmount": "รวมจำนวนชำระ",
+    "createTime": "เวลาสร้าง",
     "goToPayFailed": "ชำระไม่สำเร็จ",
     "goToPayFailedTip": "กรุณาลองใหม่อีกครั้ง",
     "noOrder": "ไม่มีคำสั่งซื้อ",

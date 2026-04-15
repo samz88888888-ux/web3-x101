@@ -287,6 +287,8 @@
     "goToPay": "去支付~",
     "getting": "获取中...",
     "goToPayFailed": "去支付失败",
+    "totalPayAmount": "支付总额",
+    "createTime": "创建时间",
     "goToPayFailedTip": "请稍后再试",
     "noOrder": "暂无订单",
     "packageName": "组合名称",

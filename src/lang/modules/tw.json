@@ -289,6 +289,8 @@
     "getting": "獲取中...",
     "goToPayFailed": "去支付失敗",
     "goToPayFailedTip": "請稍後再試",
+    "totalPayAmount": "支付總額",
+    "createTime": "創建時間",
     "noOrder": "暫無訂單",
     "packageName": "組合名稱",
     "investmentQuantity": "投資數量",

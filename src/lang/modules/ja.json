@@ -287,6 +287,8 @@
     "pendingOrder": "待機注文",
     "goToPay": "支払いへ~",
     "getting": "取得中...",
+    "totalPayAmount": "支払い総額",
+    "createTime": "作成時間",
     "goToPayFailed": "支払いに失敗しました",
     "goToPayFailedTip": "しばらくしてから再度お試しください",
     "noOrder": "注文なし",

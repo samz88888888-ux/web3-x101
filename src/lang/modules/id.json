@@ -288,6 +288,8 @@
     "getting": "Mengambil...",
     "goToPayFailed": "Gagal pergi ke pembayaran",
     "goToPayFailedTip": "Silakan coba lagi nanti",
+    "totalPayAmount": "Total Pembayaran",
+    "createTime": "Waktu Dibuat",
     "noOrder": "Tidak ada pesanan",
     "packageName": "Paket",
     "investmentQuantity": "Jumlah",
