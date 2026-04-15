@@ -1366,7 +1366,18 @@ export const payWithDualToken = async (orderInfo) => {
   }
 }
 
-// LP 双币支付（兼容 1 个原生币 + 1 个 ERC20）
+const buildSingleTokenOrderData = (contractAddress, data, token) => ({
+  recharge_contract_address: contractAddress,
+  data,
+  need_pay: {
+    address: token.address,
+    amount: token.amount,
+    decimals: token.decimals,
+    name: token.name
+  }
+})
+
+// LP 支付（兼容 单原生币 / 单 ERC20 / 原生币 + ERC20 / 双 ERC20）
 export const payWithLpDualAsset = async (orderInfo) => {
   await ensureReady()
 
@@ -1374,6 +1385,81 @@ export const payWithLpDualAsset = async (orderInfo) => {
   const tokens = [token1, token2].filter(Boolean)
   const nativeToken = tokens.find((token) => isNativePaymentToken(token))
   const erc20Token = tokens.find((token) => token && !isNativePaymentToken(token))
+
+  if (tokens.length === 0) {
+    return Promise.reject(new Error('支付信息不完整'))
+  }
+
+  if (tokens.length === 1 && nativeToken) {
+    try {
+      console.log('==================== 开始 LP 单原生币支付 ====================')
+
+      const nativeDecimals = nativeToken.decimals ?? config.network.nativeCurrency.decimals ?? 18
+      const nativeAmountWei = normalizeNativeValue(value, nativeToken.amount, nativeDecimals)
+
+      showLoadingToast({
+        message: `检查${nativeToken.name}余额...`,
+        duration: 0
+      })
+
+      const nativeBalance = await getNativeBalance()
+      if (nativeBalance < nativeAmountWei) {
+        closeToast()
+        showToast(`${nativeToken.name}余额不足`)
+        return Promise.reject(new Error(`${nativeToken.name}余额不足`))
+      }
+
+      showLoadingToast({
+        message: '发起支付中...',
+        duration: 0
+      })
+
+      const tx = await signer.sendTransaction({
+        to: contractAddress,
+        data,
+        value: nativeAmountWei,
+        gasLimit: GAS_LIMITS.contractCall
+      })
+
+      if (tx.hash) {
+        showLoadingToast({
+          message: '链上确认中...',
+          duration: 0
+        })
+      }
+
+      await tx.wait()
+
+      closeToast()
+      showToast('支付成功')
+
+      console.log('==================== LP 单原生币支付完成 ====================')
+
+      return Promise.resolve(tx)
+    } catch (error) {
+      if (isUserRejectedError(error)) {
+        closeToast()
+        showToast(i18n.global.t('exchange.userCancelTransaction'))
+        return Promise.reject(error)
+      }
+
+      console.error('==================== LP 单原生币支付失败 ====================')
+      console.error('错误类型:', error.code)
+      console.error('错误信息:', error.message)
+      console.error('完整错误:', error)
+      console.error('====================================================')
+
+      closeToast()
+      if (!error.message.includes('余额不足')) {
+        showToast('支付失败')
+      }
+      return Promise.reject(error)
+    }
+  }
+
+  if (tokens.length === 1 && erc20Token) {
+    return payWithTokenOnly(buildSingleTokenOrderData(contractAddress, data, erc20Token))
+  }
 
   // 如果不是原生币 + ERC20 组合，则回退到原有双 ERC20 流程，避免影响其他情况
   if (!nativeToken || !erc20Token) {

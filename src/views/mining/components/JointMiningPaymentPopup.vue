@@ -202,34 +202,26 @@ const handleConfirm = async () => {
 
   try {
     isConfirming.value = true
+
+    const normalizedTokens = needPayList.value.map((coin) => ({
+      address: coin.address,
+      amount: coin.amount,
+      decimals: coin.decimals,
+      name: coin.name,
+      is_native: isNativeCoin(coin)
+    }))
+    const nativeToken = normalizedTokens.find((token) => token.is_native)
     
     // 构建支付参数
     const paymentData = {
       contractAddress: contractAddress.value,
       data: signedData.value,
-      token1: {
-        address: needPayList.value[0].address,
-        amount: needPayList.value[0].amount,
-        decimals: needPayList.value[0].decimals,
-        name: needPayList.value[0].name
-      },
-      token2: needPayList.value[1]
-        ? {
-            address: needPayList.value[1].address,
-            amount: needPayList.value[1].amount,
-            decimals: needPayList.value[1].decimals,
-            name: needPayList.value[1].name,
-            is_native: isNativeCoin(needPayList.value[1])
-          }
-        : null,
-      value: props.orderInfo?.value
+      token1: normalizedTokens[0] || null,
+      token2: normalizedTokens[1] || null,
+      value: props.orderInfo?.value ?? nativeToken?.amount
     }
 
-    if (paymentData.token1) {
-      paymentData.token1.is_native = isNativeCoin(needPayList.value[0])
-    }
-
-    // 联合铸币兼容 PYTHIA(GAS) + ERC20，同时不影响其他双 ERC20 流程
+    // 联合铸币兼容 单 PYTHIA(GAS)、PYTHIA(GAS) + ERC20，同时不影响其他 ERC20 流程
     const tx = await web3.payWithLpDualAsset(paymentData)
 
     // 关闭弹窗

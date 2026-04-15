@@ -40,6 +40,8 @@ const x101Price = computed(() => boxConfig.value?.x101_price || 0)
 // ===== 支付选择弹窗 =====
 const showPaymentPopup = ref(false)
 const selectedPaymentType = ref(1) // 1-SOTA 2-X101，默认SOTA
+const showX101Payment = false
+const isSinglePaymentOption = computed(() => !showX101Payment)
 
 // ===== 抽奖状态 =====
 const isDrawing = ref(false)
@@ -586,7 +588,8 @@ onMounted(async () => {
                   </div>
                   <div class="record-info">
                     <span class="record-time">{{ formatTime(item.created_at) }}</span>
-                    <span class="record-sub">-{{ formatNumber(item.sub_x101, 3) }} {{ Number(item.amount_type) === 2 ? 'X101' :
+                    <span class="record-sub">-{{ formatNumber(item.sub_x101, 3) }} {{ Number(item.amount_type) === 2 ?
+                      'X101' :
                       'SOTA' }}</span>
                   </div>
                 </div>
@@ -642,13 +645,8 @@ onMounted(async () => {
     </div>
 
     <!-- 支付方式选择弹窗 -->
-    <van-popup
-      v-model:show="showPaymentPopup"
-      position="bottom"
-      :style="{ background: 'transparent' }"
-      :overlay-style="{ background: 'rgba(0, 0, 0, 0.7)' }"
-      round
-    >
+    <van-popup v-model:show="showPaymentPopup" position="bottom" :style="{ background: 'transparent' }"
+      :overlay-style="{ background: 'rgba(0, 0, 0, 0.7)' }" round>
       <div class="payment-popup">
         <!-- 标题栏 -->
         <div class="payment-popup-header">
@@ -659,56 +657,52 @@ onMounted(async () => {
         </div>
 
         <!-- 支付选项 -->
-        <div class="payment-options">
+        <div class="payment-options" :class="{ 'single-option': isSinglePaymentOption }">
           <!-- SOTA 选项 -->
-          <div
-            class="payment-option"
-            :class="{ selected: selectedPaymentType === 1 }"
-            @click="selectedPaymentType = 1"
-          >
+          <div class="payment-option" :class="{ selected: selectedPaymentType === 1, compact: isSinglePaymentOption }"
+            @click="selectedPaymentType = 1">
             <div class="option-header">
               <div class="option-coin-badge sota">SOTA</div>
               <div class="option-check" v-if="selectedPaymentType === 1">
                 <van-icon name="success" size="18" color="#fff" />
               </div>
             </div>
-            <div class="option-need">
-              <span class="option-need-label">{{ t('box.needPay') }}</span>
-              <span class="option-need-value">{{ formatNumber(needSOTA, 3) }}</span>
-            </div>
-            <div class="option-balance">
-              <span class="option-balance-label">{{ t('box.myBalance') }}</span>
-              <span
-                class="option-balance-value"
-                :class="{ 'insufficient': parseFloat(sotaBalance) < parseFloat(needSOTA) }"
-              >{{ formatNumber(sotaBalance, 4) }}</span>
+            <div class="option-body">
+              <div class="option-need">
+                <span class="option-need-label">{{ t('box.needPay') }}</span>
+                <span class="option-need-value">{{ formatNumber(needSOTA, 3) }}</span>
+              </div>
+              <div class="option-divider" v-if="isSinglePaymentOption"></div>
+              <div class="option-balance">
+                <span class="option-balance-label">{{ t('box.myBalance') }}</span>
+                <span class="option-balance-value"
+                  :class="{ 'insufficient': parseFloat(sotaBalance) < parseFloat(needSOTA) }">{{ formatNumber(sotaBalance,
+                    4) }}</span>
+              </div>
             </div>
           </div>
 
           <!-- X101 选项 -->
-          <div
-            class="payment-option"
-            :class="{ selected: selectedPaymentType === 2 }"
-            @click="selectedPaymentType = 2"
-          >
+          <!-- <div v-if="showX101Payment" class="payment-option" :class="{ selected: selectedPaymentType === 2 }" @click="selectedPaymentType = 2">
             <div class="option-header">
               <div class="option-coin-badge x101">X101</div>
               <div class="option-check" v-if="selectedPaymentType === 2">
                 <van-icon name="success" size="18" color="#fff" />
               </div>
             </div>
-            <div class="option-need">
-              <span class="option-need-label">{{ t('box.needPay') }}</span>
-              <span class="option-need-value">{{ formatNumber(needX101, 3) }}</span>
+            <div class="option-body">
+              <div class="option-need">
+                <span class="option-need-label">{{ t('box.needPay') }}</span>
+                <span class="option-need-value">{{ formatNumber(needX101, 3) }}</span>
+              </div>
+              <div class="option-balance">
+                <span class="option-balance-label">{{ t('box.myBalance') }}</span>
+                <span class="option-balance-value"
+                  :class="{ 'insufficient': parseFloat(x101Balance) < parseFloat(needX101) }">{{ formatNumber(x101Balance,
+                  4) }}</span>
+              </div>
             </div>
-            <div class="option-balance">
-              <span class="option-balance-label">{{ t('box.myBalance') }}</span>
-              <span
-                class="option-balance-value"
-                :class="{ 'insufficient': parseFloat(x101Balance) < parseFloat(needX101) }"
-              >{{ formatNumber(x101Balance, 4) }}</span>
-            </div>
-          </div>
+          </div> -->
         </div>
 
         <!-- 确认按钮 -->
@@ -1639,6 +1633,10 @@ onMounted(async () => {
     position: relative;
     z-index: 1;
 
+    &.single-option {
+      justify-content: center;
+    }
+
     .payment-option {
       flex: 1;
       padding: 24px 20px;
@@ -1651,9 +1649,16 @@ onMounted(async () => {
       flex-direction: column;
       gap: 14px;
 
+      &.compact {
+        max-width: 100%;
+        padding: 28px 26px;
+        gap: 20px;
+      }
+
       &.selected {
         border-color: #F903A4;
         background: rgba(249, 3, 164, 0.08);
+        box-shadow: 0 12px 28px rgba(249, 3, 164, 0.12);
       }
 
       .option-header {
@@ -1690,6 +1695,12 @@ onMounted(async () => {
         }
       }
 
+      .option-body {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
       .option-need,
       .option-balance {
         display: flex;
@@ -1721,6 +1732,57 @@ onMounted(async () => {
             color: #FF6B6B;
           }
         }
+      }
+
+      .option-divider {
+        display: none;
+      }
+    }
+
+    &.single-option .payment-option {
+      width: 100%;
+
+      .option-header {
+        align-items: center;
+      }
+
+      .option-coin-badge {
+        padding: 8px 22px;
+        font-size: 26px;
+      }
+
+      .option-check {
+        width: 36px;
+        height: 36px;
+      }
+
+      .option-body {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 18px;
+      }
+
+      .option-need,
+      .option-balance {
+        flex: 1;
+        min-width: 0;
+        padding: 12px 0 2px;
+      }
+
+      .option-need-value,
+      .option-balance-value {
+        font-size: 30px;
+        line-height: 1.1;
+      }
+
+      .option-divider {
+        display: block;
+        width: 1px;
+        background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0),
+            rgba(255, 255, 255, 0.18) 20%,
+            rgba(255, 255, 255, 0.18) 80%,
+            rgba(255, 255, 255, 0));
       }
     }
   }

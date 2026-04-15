@@ -78,9 +78,9 @@ const showPaymentMethodPicker = ref(false)
 // 支付方式选项
 const paymentMethodColumns = [
   { text: 'PYTHIA', value: 1, icon: pytIcon },
-  { text: 'ADX', value: 2, icon: adxIcon },
-  { text: 'MCN', value: 3, icon: mcnIcon },
-  { text: 'X101', value: 4, icon: x101Icon }
+  // { text: 'ADX', value: 2, icon: adxIcon },
+  // { text: 'MCN', value: 3, icon: mcnIcon },
+  // { text: 'X101', value: 4, icon: x101Icon }
 ]
 
 // 选择支付方式

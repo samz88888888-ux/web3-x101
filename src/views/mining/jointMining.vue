@@ -28,13 +28,16 @@ const showPaymentPopup = ref(false)
 const selectedPackage = ref(null)
 const orderInfo = ref(null)
 const inputPopupRef = ref(null)
+const payingOrderId = ref('')
 
 // 订单列表相关
+const orderTab = ref('mined')
 const jointMiningOrderList = ref([])
 const loading = ref(false)
 const finished = ref(false)
 const refreshing = ref(false)
 const total = ref(0)
+const isLoadingOrderList = ref(false)
 const params = ref({
   page: 1,
   page_size: 20
@@ -155,14 +158,83 @@ const handleInputConfirm = async (amount) => {
 // 支付成功
 const handlePaymentSuccess = async () => {
   showToast(t('jointMinting.paymentSuccess'))
-  // 刷新订单列表
-  // onRefresh()
+  onRefresh()
 }
 
-// 获取联合挖矿订单列表
-const getJointMiningOrderList = async () => {
+const isPendingOrderTab = computed(() => orderTab.value === 'pending')
+
+const getWaitOrderStatusText = (status) => {
+  const statusMap = {
+    1: '支付中',
+    2: '支付完成'
+  }
+  return statusMap[status] || '-'
+}
+
+const getPendingOrderId = (item) => item?.order_id || item?.id || ''
+
+const isPendingPaying = (item) => {
+  return Boolean(payingOrderId.value) && payingOrderId.value === getPendingOrderId(item)
+}
+
+const handlePendingPay = async (item) => {
+  const orderId = getPendingOrderId(item)
+
+  if (Number(item?.status) !== 1 || isPendingPaying(item)) {
+    return
+  }
+
+  if (!orderId) {
+    showToast('订单ID不存在')
+    return
+  }
+
+  payingOrderId.value = orderId
+
   try {
-    const res = await api.power.jointMiningOrderList(params.value)
+    showLoadingToast({
+      message: '获取支付信息中...',
+      forbidClick: true,
+      duration: 0
+    })
+
+    const res = await api.power.jointMiningGetPayData({
+      id: orderId
+    })
+
+    closeToast()
+    orderInfo.value = res
+    console.log('联合挖矿待支付订单支付数据:', res)
+    showPaymentPopup.value = true
+  } catch (error) {
+    closeToast()
+    showToast(error.message || '获取支付信息失败')
+  } finally {
+    payingOrderId.value = ''
+  }
+}
+
+const resetOrderList = () => {
+  finished.value = false
+  loading.value = false
+  refreshing.value = false
+  total.value = 0
+  params.value.page = 1
+  jointMiningOrderList.value = []
+}
+
+const getJointMiningOrderList = async () => {
+  if (isLoadingOrderList.value) {
+    return
+  }
+
+  isLoadingOrderList.value = true
+
+  try {
+    const request = isPendingOrderTab.value
+      ? api.power.jointMiningWaitOrderList
+      : api.power.jointMiningOrderList
+    const res = await request(params.value)
 
     if (res?.list) {
       // 如果是下拉刷新,清空列表
@@ -175,6 +247,7 @@ const getJointMiningOrderList = async () => {
       }
 
       total.value = res.total || 0
+      refreshing.value = false
 
       // 加载成功后,页码+1,准备下次加载
       params.value.page++
@@ -186,14 +259,32 @@ const getJointMiningOrderList = async () => {
 
       loading.value = false
     } else {
+      if (refreshing.value) {
+        jointMiningOrderList.value = []
+        refreshing.value = false
+      }
+      total.value = 0
       finished.value = true
       loading.value = false
     }
   } catch (error) {
-    showToast(error.message || t('jointMinting.getJointMiningOrderListFailed'))
+    if (refreshing.value) {
+      refreshing.value = false
+    }
+    showToast(error.message || (isPendingOrderTab.value ? '获取待支付订单失败' : t('jointMinting.getJointMiningOrderListFailed')))
     finished.value = true
     loading.value = false
+  } finally {
+    isLoadingOrderList.value = false
   }
+}
+
+const handleOrderTabChange = (tab) => {
+  if (orderTab.value === tab) return
+
+  orderTab.value = tab
+  resetOrderList()
+  getJointMiningOrderList()
 }
 
 // 上拉加载
@@ -206,10 +297,8 @@ const onLoad = () => {
 
 // 下拉刷新
 const onRefresh = () => {
-  // 重置状态
-  finished.value = false
-  params.value.page = 1
-  jointMiningOrderList.value = []
+  resetOrderList()
+  refreshing.value = true
   getJointMiningOrderList()
 }
 </script>
@@ -417,12 +506,22 @@ const onRefresh = () => {
             <div class="flex gap-12 items-center justify-start">
               <div class="box w-7 h-30 rounded-1398 flex items-center justify-center"></div>
               <span class="fsize-28 font-pingfang font-600 text-[#fff] leading-normal">{{
-                t('jointMinting.jointMiningOrder')
+                isPendingOrderTab ? t('jointMinting.pendingOrder') : t('jointMinting.jointMiningOrder')
                 }}</span>
             </div>
             <span class="fsize-22 font-miSans font-400 text-[#fff] leading-none opacity-60">{{
               t('jointMinting.jointMiningOrderTotal', { count: total })
               }}</span>
+          </div>
+          <div class="order-tabs w-100% mb-24">
+            <button type="button" class="order-tab" :class="{ active: orderTab === 'mined' }"
+              @click="handleOrderTabChange('mined')">
+              {{ t('jointMinting.jointMiningOrder') }}
+            </button>
+            <button type="button" class="order-tab" :class="{ active: orderTab === 'pending' }"
+              @click="handleOrderTabChange('pending')">
+              {{ t('jointMinting.pendingOrder') }}
+            </button>
           </div>
           <div class="log-line"></div>
 
@@ -433,14 +532,14 @@ const onRefresh = () => {
               class="log-list">
               <!-- 空状态 -->
               <div v-if="jointMiningOrderList.length === 0 && !loading" class="empty-state">
-                <van-empty :description="t('jointMinting.noOrder')" />
+                <van-empty :description="isPendingOrderTab ? '暂无待支付订单' : t('jointMinting.noOrder')" />
               </div>
 
               <!-- 列表项 -->
               <div v-for="(item, index) in jointMiningOrderList" :key="item.id || index"
                 class="flex flex-col items-start justify-center gap-25 w-100%">
                 <div class="log-line"></div>
-                <div class="flex flex-col w-100% gap-16 pb-20 items-start justify-center">
+                <div v-if="!isPendingOrderTab" class="flex flex-col w-100% gap-16 pb-20 items-start justify-center">
                   <!-- 联合挖矿名称 -->
                   <div class="flex items-center justify-between w-100%">
                     <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">{{
@@ -499,6 +598,41 @@ const onRefresh = () => {
                     <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
                       {{ item.created_at }}
                     </span>
+                  </div>
+                </div>
+                <div v-else class="flex flex-col w-100% gap-16 pb-20 items-start justify-center">
+                  <!-- <div class="flex items-center justify-between w-100%">
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">订单ID</span>
+                    <span class="fsize-24 font-roboto font-500 text-[#fff] leading-normal">
+                      {{ item.id || '-' }}
+                    </span>
+                  </div> -->
+                  <div class="flex items-center justify-between w-100%">
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">支付总额</span>
+                    <span class="fsize-24 font-roboto font-500 text-[#fff] leading-normal">
+                      {{ formatNumber(item.total_amount || 0, 3) }} PYTHIA
+                    </span>
+                  </div>
+                  <!-- <div class="flex items-center justify-between w-100%">
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">状态</span>
+                    <span class="fsize-24 font-pingfang font-500 leading-normal"
+                      :class="item.status === 2 ? 'text-[#16FFC2]' : 'text-[#FFA94D]'">
+                      {{ getWaitOrderStatusText(item.status) }}
+                    </span>
+                  </div> -->
+                  <div class="flex items-center justify-between w-100%">
+                    <span class="fsize-24 font-pingfang font-500 text-[#fff] leading-normal">创建时间</span>
+                    <span class="fsize-24 font-pingfang font-400 text-[#fff] leading-normal opacity-80">
+                      {{ item.created_at }}
+                    </span>
+                  </div>
+                  <div class="flex w-100% mt-8 items-center justify-end">
+                    <button type="button" class="pending-pay-btn"
+                      :class="{ disabled: Number(item.status) !== 1 || isPendingPaying(item) }"
+                      @click="handlePendingPay(item)">
+                      {{ isPendingPaying(item) ? t('jointMinting.getting') : Number(item.status) === 1 ?
+                        t('jointMinting.goToPay') : t('jointMinting.paymentSuccess') }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -675,6 +809,54 @@ const onRefresh = () => {
       color: rgba(255, 255, 255, 0.6);
       font-size: 24px;
     }
+  }
+}
+
+.order-tabs {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.order-tab {
+  min-width: 160px;
+  height: 58px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 22px;
+  font-family: 'PingFang SC', sans-serif;
+  transition: all 0.3s ease;
+
+  &.active {
+    background: linear-gradient(180deg, #00ff6e 0%, #009543 100%);
+    color: #02151d;
+    font-weight: 600;
+  }
+}
+
+.pending-pay-btn {
+  min-width: 144px;
+  height: 58px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #00ff6e 0%, #009543 100%);
+  color: #02151d;
+  font-size: 24px;
+  font-family: 'PingFang SC', sans-serif;
+  font-weight: 600;
+  transition: all 0.3s ease;
+
+  &.disabled {
+    background: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  &:active {
+    transform: scale(0.98);
   }
 }
 

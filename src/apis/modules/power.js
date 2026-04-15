@@ -11,5 +11,7 @@ export default {
   // 联合挖矿
   jointMiningInfo: { method: 'get', url: '/api/v1/union/config' }, // 获取联合挖矿信息
   jointMiningGetOrder: { method: 'post', url: '/api/v1/union/getOrder' }, // 获取联合挖矿链上支付订单信息
-  jointMiningOrderList: { method: 'get', url: '/api/v1/union/orderList' } // 获取联合挖矿订单列表
+  jointMiningGetPayData: { method: 'post', url: '/api/v1/union/getPayData' }, // 获取联合挖矿待支付订单支付信息
+  jointMiningOrderList: { method: 'get', url: '/api/v1/union/orderList' }, // 获取联合挖矿订单列表
+  jointMiningWaitOrderList: { method: 'get', url: '/api/v1/union/waitOrderList' } // 获取联合挖矿待支付订单列表
 }
