@@ -461,7 +461,7 @@ const onRefresh = () => {
             rowIndex === 0 ? 'mt-30' : 'mt-21'
           ]">
             <div v-for="(item, itemIndex) in row" :key="itemIndex"
-              class="out-coin flex flex-1 py-22 px-20 gap-12 rounded-20 items-center justify-start min-h-100">
+              class="out-coin flex flex-1 py-22 px-20 gap-12 rounded-20 items-center justify-start">
               <van-image width="16" height="16" :src="checkedIcon" fit="contain"></van-image>
               <div class="flex flex-col items-start justify-center">
                 <span class="fsize-26 font-roboto font-700 text-[#fff] lh-36">
